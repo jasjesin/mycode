@@ -1,0 +1,1067 @@
+URLs to refer:
+Code: https://github.com/zealvora/terraform-beginner-to-advanced-resource
+CodePath on local: /Users/jasdil/Documents/Learnings/terraform/certification/codeRepo/terraform-beginner-to-advanced-resource
+
+Terraform supports 2,748+ providers at the moment. AWS is just one of them.
+  Currently only 36 providers r maintained by HashiCorp directly, rest r from HashiCorp's marketplace.
+Terraform version 0.13 onwards,
+  If we use a provider, not maintained by HashiCorp, then, terraform {required_providers{<providerName = { source = ""}}} block is mandatory.
+
+AWS Documentation: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+        Look for resource to be created & then search for Required, to see list of mandatory components to be defined.
+        Each provider has resources, segregated into multiple categories
+
+Each provider's page will have documentation set in same standard template containing following details:
+  Resource <ResourceName>
+  Description
+  Example Usage
+  Argument Reference (Required or Optional)
+
+
+3 steps to launch a resource in AWS:-
+1. How to authenticate to AWS -- Go to registry.terraform.io, go to providers > AWS, n click on documentation, use static creds
+          Create a user terraform, give Admin Access, generate access key
+2. Which region
+3. What resource
+
+terraform init --> reads ur cfg to rectify which provider needs to be used & downloads all provider-specific certified terraform plugins (hashicorp/aws v3.27.0, signed by Hashicorp)
+              This downloaded plugin is a module that contains all resources, needed to perform API interactions with the provider, to create defined infrastructure
+
+Resources are references to the associated actual svc that are provided by provider.
+
+
+
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+/* Based on above specified source n minimum version, terraform init command reads this n outputs as >>
+ jasdil@JasDiLMacAir practice % $terraform init
+ Initializing the backend...
+ Initializing provider plugins...
+
+ - Finding hashicorp/aws versions matching "~> 3.0"...
+
+ - Installing hashicorp/aws v3.76.0...
+ - Installed hashicorp/aws v3.76.0 (signed by HashiCorp)
+
+ Terraform has created a lock file .terraform.lock.hcl to record the provider
+ selections it made above. Include this file in your version control repository
+ so that Terraform can guarantee to make the same selections by default when
+ you run "terraform init" in the future.
+
+ Terraform has been successfully initialized! */
+
+terraform plan --> provides info abt wht terraform is planning to create, based on mandatory components provided n rest picked up as default, that will be known after apply / resource is created
+terraform apply --> terraform goes ahead n creates the resources defined
+
+overall syntax remains same in Terraform,
+  If comfortable wid writing config for 1 provider, u can write config for other provider as well
+
+Example, create github repo using terraform. Use *.tfvars file to store access token for github for now, to avoid passing password
+
+Because you flagged the new variables as sensitive, Terraform redacts their values from its output when you run a plan, apply, or destroy command. Notice that the password is marked sensitive value, while the username is marked sensitive. The AWS provider considers the password argument for any database instance as sensitive, whether or not you declare the variable as sensitive, and will redact it as a sensitive value. You should still declare this variable as sensitive to make sure it's redacted if you reference it in other locations than the specific password argument.
+
+Setting values with a .tfvars file allows you to separate sensitive values from the rest of your variable values, and makes it clear to people working with your configuration which values are sensitive. However, it requires that you maintain and share the secret.tfvars file with only the appropriate people. You must also be careful not to check .tfvars files with sensitive values into version control. For this reason, GitHub's recommended .gitignore file for Terraform configuration is configured to ignore files matching the pattern *.tfvars.
+
+
+terraform destroy --> destorys all resources.
+To destroy a specific resource,
+terraform destroy -target <resourceType>.<Name>
+Example:
+terraform destroy -target aws_instance.ec2
+
+jasdil@JasDiLMacAir terraform_certification_practice % $terraform destroy -target aws_instance.ec2 -auto-approve -var-file="secrets.tfvars"
+aws_key_pair.ec2_keypair: Refreshing state... [id=us-region-key-pair]
+aws_instance.ec2: Refreshing state... [id=i-05ffbe6b401a73ebf]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  - destroy
+
+Terraform will perform the following actions:
+
+  # aws_instance.ec2 will be destroyed
+  - resource "aws_instance" "ec2" {
+      - ami                                  = "ami-00d8a762cb0c50254" -> null
+      - arn                                  = "arn:aws:ec2:us-west-1:048439362064:instance/i-05ffbe6b401a73ebf" -> null
+      - associate_public_ip_address          = true -> null
+      - availability_zone                    = "us-west-1c" -> null
+.....
+
+Plan: 0 to add, 0 to change, 1 to destroy.
+aws_instance.ec2: Destroying... [id=i-05ffbe6b401a73ebf]
+aws_instance.ec2: Still destroying... [id=i-05ffbe6b401a73ebf, 10s elapsed]
+aws_instance.ec2: Still destroying... [id=i-05ffbe6b401a73ebf, 20s elapsed]
+aws_instance.ec2: Still destroying... [id=i-05ffbe6b401a73ebf, 30s elapsed]
+aws_instance.ec2: Destruction complete after 30s
+╷
+│ Warning: Resource targeting is in effect
+│
+│ You are creating a plan with the -target option, which means that the result of this plan may not represent all of the changes requested by
+│ the current configuration.
+│
+│ The -target option is not for routine use, and is provided only for exceptional situations such as recovering from errors or mistakes, or when
+│ Terraform specifically suggests to use it as part of an error message.
+╵
+╷
+│ Warning: Applied changes may be incomplete
+│
+│ The plan was created with the -target option in effect, so some changes requested in the configuration may have been ignored and the output
+│ values may not be fully updated. Run the following command to verify that no other changes are pending:
+│     terraform plan
+│
+│ Note that the -target option is not suitable for routine use, and is provided only for exceptional situations such as recovering from errors
+│ or mistakes, or when Terraform specifically suggests to use it as part of an error message.
+╵
+
+Destroy complete! Resources: 1 destroyed.
+jasdil@JasDiLMacAir terraform_certification_practice %
+
+
+If you comment out a resource in tf file, Terraform will understand that the resource needs to be deleted.
+
+[] Terraform State File:
+Terraform stores current state n metadata (live) of infra/resources created from TF files, in TF State file.
+This State file allows TerraForm to track/map real world resources to your existing config.
+
+[] Desired & Current State:
+TerraForm's primary function is to create/modify/destory infra resources to match desired state, as specified in TF files
+Whtever config u specify in tf files, is referred to as Desired State
+
+Current State is the state of resources that r actually n currently deployed. This state is fetched each time by Terraform, before executing apply or refresh plan.
+
+Example:
+If we stop ec2 instance, change its ins type, start it back again. Now current state becomes different than desired state
+Now, if we run terraform plan, it goes n fetches current state of infra n rectifies that ins type is changed..
+TerraForm will go ahead n modifies/make changes to infra to match desired state
+
+Example I tried: I made repo visibility from pvt to public, manually.
+
+jasdil@JasDiLMacAir terraform_certification_practice % $terraform plan -var-file="secrets.tfvars"
+github_repository.terraform_repo: Refreshing state... [id=terraform_repo]
+aws_key_pair.ec2_keypair: Refreshing state... [id=us-region-key-pair]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # github_repository.terraform_repo will be updated in-place
+  ~ resource "github_repository" "terraform_repo" {
+        id                          = "terraform_repo"
+        name                        = "terraform_repo"
+      ~ visibility                  = "public" -> "private"
+      - vulnerability_alerts        = true -> null
+        # (28 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+jasdil@JasDiLMacAir terraform_certification_practice %
+
+[] Scenario whr Terraform will NOT change to match Current State wid Desired State:
+if a component like SG is not explicitly defined in TF file, and is manually changed from Console,
+  TF plan will just refresh n will pick its updated value, like SG manually changed frm default to custom,
+  but will not revert it back to custom, since SG was nvr explicitly specified in TF file.
+
+Thats y its important to NOT define bare minimum but keep separate TF files for IAM, SG, that can be reused here
+And if these change, TF should be able to revert those changes back, to match desired state.
+
+[] Provider Source Versions:
+vry important to make sure provider src verisions r not updated to latest in PRD over a period of time.
+Reason: many newer features may cause break in functionality for resources/components, used in previous versions.
+Use ~> <version>. ~ means all minor version of specified major versions r acceptable.
+Example:
+Source = ~>2.0 -- This means all 2.x versions r ok but major upgrade from 2.x to 3.x is not allowed.
+u can also specify acceptance criteria as between two specific ranges like
+>=2.10,<=2.30
+
+.terraform.lock.hcl file allows us to lock to a specific version of the provider, even if manual updates r made in terraform state files.
+only way to change version is to remove lock file manually or execute following command in case of higher version upgrade >>
+
+terraform init -upgrade <-- helps perform forcible upgrade to higher version, as specified in constraints.
+
+[] attributes (values of components of resources created) can be
+- fetched from terraform state files,
+- outputted n
+- can be provided as input to next file.
+
+Example: Value for new Elastic IP created can be fetched from state file, provided as input for IP to be added to SG/Firewall, for it not to be blocked
+
+[] Outputs: These are the outputs of defined components that are printed on the console.
+Example: if public IP of new EIP or new Bucket Name of S3 need to be specified, then those can be defined in output block, for those to be printed on console.
+If specific component is not defined for a resource in output block, then, all components are listed.
+
+[] Multiple approaches to Variable Assignment in sequence of priority given by Terraform:
+P1 - command line flags -- defining while executing terraform commands, as -var="Name=value" or -var-file="fileName"
+P2 - Env variables -- export env variables as TF_VAR_<variableName> for TerraForm to pick these up
+P3 - from a file -- terraform.tfvars or *.tfvars -- here u can specify direct name = value pairs
+P4 - variable default -- defining variables in a separate tf file n invoking wid variable names in other tf files
+        If default value is not specified in variable assignment, then that value is asked during TerraForm cmd execution
+
+PRD Environment: Best practice is to hv both variables.tf/vars.tf as well as .tfvars file to have mix of variables.
+
+[] Data Types:
+Importance of type in variables: helps to restrict input value to a specific type only.
+Example:
+vars.tf has
+variable "ID" {
+type = number
+}
+Now if terraform.tfvars specifies ID="jas123", then TerraForm apply/execution plan will give error.
+
+Its a best practice to specify type of value expected for a variable, as that serves as reference point to fill values appropriately in terraform.tfvars file
+
+[] count: helps scale resources horizontally. however, each resource may share same name.
+    Use name="<Name>.${count.index}" to add a number to each name, to keep name unique.
+    Now if we don't want to use .1, .2 etc....we can define a list to specify needed names. Like >>
+    var.elb_names[count.index]
+
+[] Conditional variables:
+    we can restrict creation n count of resources based on conditions, for which values can b specified in tfvars etc.
+resources.tf >>
+    resource "aws_instance" "ec2_ins1" {
+      ami = var.ec2[var.location.region]
+      instance_type = var.ec2.type
+      key_name = aws_key_pair.ec2_keypair.id
+      count = var.Prod == "yes" ? 3 : 0
+      tags = {
+        "Name" = var.ec2_names[count.index]
+      }
+    }
+
+    resource "aws_instance" "ec2_ins2" {
+      ami = var.ec2[var.location.region]
+      instance_type = var.ec2.type
+      key_name = aws_key_pair.ec2_keypair.id
+      count = var.Prod == "no" ? 1 : 0
+      tags = {
+        "Name" = var.ec2_names[count.index]
+      }
+    }
+vars.tf >>
+    variable "Prod" {
+      description = "Do you need a Prod Environment to be setup?"
+    }
+terraform.tfvars >>
+    Prod = "no"
+
+
+[] chk on built-in functions :
+    like file(), formatdate ("<format>",timestamp()) {something like tht}, string operations, lots of them
+
+[] Data Sources, help pull most recent values like AMI IDs etc dynamically, so that we need not hardcode it.
+data "aws_ami" "ec2" {
+  most_recent = true
+  owners = ["amazon"]
+  filter {
+    name = "name"
+    values = ["amzn2-ami-hvm*"]
+  }
+}
+
+ami = data.aws_ami.ec2.id
+
+look for more data sources, lots of them, apart frm just aws_ami
+
+If you need to find more details related to options that can be used in filters, you can refer to the following AWS documentation:
+https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html
+Refer to the --filters option
+
+[] Debugging:
+  TF provide ability to change verbosity of logs by setting TF_LOG env variable to TRACE, DEBUG, INFO, WARN or ERROR
+export TF_LOG=<value>
+export TF_LOG_PATH=<logPathFile>
+n then execute tf cmds
+
+[] format: terraform fmt <-- formats indentation of code
+
+[] validating tf config files wid terraform validate cmd
+
+jasdil@JasDiLMacAir attributes_n_output_values % $terraform validate
+Success! The configuration is valid.
+
+jasdil@JasDiLMacAir attributes_n_output_values %
+
+[] Load Order & Semantics:
+TF loads all .tf or .tf.json files in alphabetical order.
+
+[] Dynamic Blocks:
+thr r multiple repeatable blocks tht need to be defined.
+Example, ingress n egress blocks that need to be defined for each port.
+if there r 100 unique ports to be allowed, may end up defining 200 blocks wid 6 lines of each block, making it 1200 lines
+
+Dynamic blocks allow us to dynamically construct repeatable nested blocks,
+    supported inside resource, data, provider n provisioner blocks.
+resources.tf >>
+dynamic "ingress" {
+for each = var.sg_ports
+iterator = port #<-- this iterator arg set name of temp variable tht represents current element of value
+                # if this is not set, port.value defaults to ingress.value. Setting it to port makes it more understandable
+content {
+from_port = port.value
+to_port = port.value
+protocol = "tcp"
+cidr_blocks = ["0.0.0.0/0"]
+}
+}
+vars.tf >>
+variable "sg_ports" {
+type = list(number)
+description = "list of ingress ports"
+default = [8200, 8201, 8300, 9200, 9500]
+}
+
+
+[] Tainting resources: terraform taint aws_instance.ec2 #<-- manually marks instance as tainted.
+after this, once terraform plan/apply is executed,
+ tf basically replaces ec2 ins by destroying n recreating it, to restore it back to original state
+      if lot of manual changes made locally thru console or by logging in to box
+So, taint cmd does NOT modify infra but modifies state of file to mark resource as tainted.
+Note tht tainting a resource for recreation can affect resources tht depend on newly tainted resource.
+Example, if ec2 ins is tained n recreated, DNS will need to be pointed to new IP.
+So, alwys look into dependencies before marking it as tainted
+
+
+[] Splat Expressions [*]: gets us list of all attributes, used for arn, id and name.
+Example:
+resource "aws_iam_user" "lb" {
+  name = "iamuser.${count.index}"
+  count = 5
+  path = "/Users/jasdil/Documents/Learnings/terraform/certification/practice/terraform_certification_practice/attributes_n_output_values"
+}
+output "arns" {
+  value = aws_iam_user.lb[*].arn
+}
+
+[] Graph: terraform graph cmd generates visual representation of config or execution plan in DOT format, tht can be converted to image
+
+jasdil@JasDiLMacAir attributes_n_output_values % $terraform graph > graph.dot
+jasdil@JasDiLMacAir attributes_n_output_values % cat graph.dot | dot -Tjpeg > graph.jpeg
+jasdil@JasDiLMacAir attributes_n_output_values % #<-- image created, open manually to see connectivities
+<< Add file graph.jpeg from >>
+/Users/jasdil/Documents/Learnings/terraform/certification/practice/terraform_certification_practice/attributes_n_output_values
+
+
+[] Saving Terraform to file: generated plan can be saved to specific path.
+This plan can then b used wid terraform apply to be sure that only changes shown in plan r applied.
+terraform plan -out=<fileName> #<-- file generated is a binary file
+terraform plan <fileName>
+
+This is helpful wen multiple users r working on same file n u want only ur changes to go thru.
+
+[] terraform output: helps extract value of output variable from state file.
+tf plan just displays execution plan but doesnt updates state file, only tf apply updates state file.
+so, if tf output is executed before tf apply, then newly added outputs wont b displayed
+Example: terraform output iam_names
+1 approach to directly chk state file manually, search in it
+2nd approach is to define output block in code, with this, with each execution, output is displayed
+3rd is to run this command wid variable name to see values
+
+[] TF Settings:
+Within TF, thrs spl TF cfg block types, used to configure some behaviors of TF itself,
+like requiring min. TF version to apply cfg.
+TF settings r gathered together in TF blocks.
+Example:
+terraform {
+required_version = "> 0.12.0" #<-- helps make sure only higher version is used for cfg.
+required_providers {
+  aws = {
+    source = "hashicorp/aws"
+    version = "~> 3.0"
+  }
+}
+}
+
+[] Dealing wid large infra:
+1. frequent issues seen like issue related to API limits for a provider
+Example, if a single TF code is written to setup 5 EC2, 3 RDS, 100 SG Rules & VPC Infra
+wen u run tf plan, 1st thing thats going to happen is update of each resource, that will trigger so many API calls.
+with this increase, it can slow down the operations as well.
+Better approach: Slice code into smaller chunks like,i.e., switch to smaller cfg whr each can b applied independently.
+create 1 TF file for each of the needed resources, as run tf plan for 1 file at a time, to stay within API limits
+
+We can prevent tf from querying current state during operations like tf plan, by adding -refresh=false flag,i.e.,
+terraform plan refresh=false #<-- this helps reduce initial API calls n processes things faster
+
+2. use same file wid multiple resources specified, but while executing, execute for 1 target resource at a time.
+Example,
+terraform plan -target=vpc
+terraform plan -target=ec2
+terraform plan -target=sg
+terraform plan -target=rds
+
+This will help perform smaller n more frequent changes.
+Usually a means to operate on isolated portions of vry large cfgs >>
+So, if something is modified in ec2 only, then entire file need not b executed,
+  just specify tht resource so tht API calls for others can b avoided.
+
+~ --> tilde --> means update is in-place, no destroying n re-creating
+
+terraform plan -refresh=false -target=ec2 #<-- helps make changes faster for only needed content wid no refresh
+
+[] zipmap function: constructs a map frm list of keys & corresponding list of values.
+zipmap (keylist, valueslist)
+zipmap(["a", "b"], [1, 2]) gives output as
+{
+"a" = 1
+"b" = 2
+}
+Useful wen creating multiple IAM users n need output tht contains direct mapping of IAM names & ARNs
+
+
+[] Comments:
+// or # single line
+or
+/*
+multi-line comment
+*/
+
+[] challenges wid Count:
+if order of index is changed or new value is added at the beginning, then that can impact all other resources.
+example, if a = [ 1,2,3] is changed to a=[0,1,2,3] then since count works on index location value, this can cause issues
+
+if resources r almost identical, count is appropriate.
+if distinctive values r needed in argument, usage of for_each is recommended
+example:
+creating ec2 instance wid count 4 will have same AMI n ins type on all 4 of them, then for_each is fine
+
+[] Set:
+- stores multiple items in single variable
+- items r unordered n no duplicates allowed
+toset function will convert list of values to set
+
+Lists
+- store multiple items in single variable
+- ordered, changeable n allow duplicate values
+- indexed, 1st item has index[0]. 2nd has index[1] etc
+
+[] for_each: makes use of map/set as index value for created resource
+Example, instead of using count.index for fetch each value from a map, u can do following >>
+resource "aws_iam_user" "iam" {
+for_each = toset(["a","b","c"])
+name=each.key
+}
+
+count should b used for identical
+for_each should b used for distinctive
+
+ resource "aws_instance" "ec2" {
+ ami = "jwhdgfdjwhge"
+ for _each = {
+ key1 = "t2.micro"
+ key2 = "t2.medium"
+ }
+ instance_type = each.value
+ key_name = each.key
+ tags ={
+ Name = each.value
+ }
+ }
+
+In blocks where _each is set, additional object is avl. This obj has 2 att.s:
+each.key   -- map key or set member corresponding to ins
+each.value -- map value corresponding to ins
+
+
+[] provisioners:
+Example, wen we create ec2 instance, just plain vanilla setup is created, wid no software like webserver deployed.
+This is whr provisioners come handy.
+Provisioners execute scripts on local or remote machine as part of resource creation/destruction.
+Ex: creation of webserver, execute script tht installs nginx webserver (via user_data.sh script).
+# Code for provisioner to setup nginx webserver
+provisioner "remote-exec" {
+  inline = [
+    "sudo amazon-linux-extras install -y nginx1.12",
+    "sudo systemctl start nginx"
+  ]
+  connection {
+    type = "ssh"
+    host = self.public_ip
+    user = "ec2_user"
+    private_key = "${file("${path.module}/creds/terraform_ec2_keypair.pem")}"
+  }
+}
+
+[] Types of provisioners:
+- local-exec -- helps invoke local executables after resource is created, cmds r executed on local machine
+Ex:
+provisioner "local-exec" {
+command="echo ${aws_instance.web.private_ip} >> private_IP.txt"
+}
+Biggest benefit is execution of ansible-playbook.
+
+- remote-exec -- helps run scripts directly on remote svr after resource is created, cmds r executed on remote machine
+    helps invoke a script on remote resource after it is created.
+    This can b used to run a config mgmt tool like chef, ansible, bootstrap into a cluster
+    remote-exec provisioner requires a connection n supports both ssh n winrrm.
+
+Other provisioners r like chef, file, salt-masterclass etc
+
+
+wenevr u get following error, set permissions to 0600
+
+jasdil@JasDiLMacAir attributes_n_output_values % ssh -i creds/terraform_ec2_keypair.pem ec2-user@54.241.101.121
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Permissions 0644 for 'creds/terraform_ec2_keypair.pem' are too open.
+It is required that your private key files are NOT accessible by others.
+This private key will be ignored.
+Load key "creds/terraform_ec2_keypair.pem": bad permissions
+ec2-user@54.241.101.121: Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
+jasdil@JasDiLMacAir attributes_n_output_values % ls -ltrh creds/terraform_ec2_keypair.pem
+-rw-r--r--@ 1 jasdil  staff   1.6K Dec 30 11:36 creds/terraform_ec2_keypair.pem
+jasdil@JasDiLMacAir attributes_n_output_values % chmod 0600 creds/terraform_ec2_keypair.pem
+jasdil@JasDiLMacAir attributes_n_output_values % ssh -i creds/terraform_ec2_keypair.pem ec2-user@54.241.101.121
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux 2 AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-2/
+[ec2-user@ip-172-31-28-188 ~]$ ls -ltrh
+total 0
+[ec2-user@ip-172-31-28-188 ~]$
+
+[] local-exec: helps invoke local scripts on local host frm whr tf is invoked, after remote resource is created
+one of best approaches is to run ansible playbooks on created svr
+resources.tf >>
+provisioner "local-exec" {
+  command = "echo ${aws_instance.ec2_ins1.private_ip} >> pvt_ip.txt"
+
+}
+
+output >>
+aws_instance.ec2_ins1: Still creating... [20s elapsed]
+aws_instance.ec2_ins1: Provisioning with 'local-exec'...
+aws_instance.ec2_ins1 (local-exec): Executing: ["/bin/sh" "-c" "echo 172.31.23.46 >> pvt_ip.txt"]
+aws_instance.ec2_ins1: Creation complete after 23s [id=i-05ec019b1abd4bff1]
+
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+jasdil@JasDiLMacAir attributes_n_output_values %
+
+
+[] provisioner types:
+1. creation-time provisioner : only run during creation, if it fails, resource is marked as tainted
+2. destroy-time provisioner : run before resource is destroyed, use when = destroy as condition
+resources.tf >>
+provisioner "local-exec" {
+  when = destroy
+  command = "rm pvt_ip.txt"
+}
+output >>
+Plan: 0 to add, 0 to change, 2 to destroy.
+aws_instance.ec2_ins1: Destroying... [id=i-05ec019b1abd4bff1]
+aws_instance.ec2_ins1: Provisioning with 'local-exec'...
+aws_instance.ec2_ins1 (local-exec): Executing: ["/bin/sh" "-c" "rm pvt_ip.txt"]
+aws_instance.ec2_ins1: Still destroying... [id=i-05ec019b1abd4bff1, 10s elapsed]
+aws_instance.ec2_ins1: Still destroying... [id=i-05ec019b1abd4bff1, 20s elapsed]
+aws_instance.ec2_ins1: Still destroying... [id=i-05ec019b1abd4bff1, 30s elapsed]
+aws_instance.ec2_ins1: Destruction complete after 30s
+aws_security_group.sg1: Destroying... [id=sg-074e82192ab99ad4b]
+aws_security_group.sg1: Destruction complete after 1s
+
+Destroy complete! Resources: 2 destroyed.
+jasdil@JasDiLMacAir attributes_n_output_values %
+
+[] failure behavior in provisioners:
+by default, provisioners tht fail, also cause tf apply itself to fail.
+on_failure setting can b used to change this default behavior.
+use on_failure = <continue|fail>
+continue -- ignore error
+fail -- raise error n stop applying (default behavior). in case of creation provisioner, this will taint the resource.
+
+
+[] null resource: #<-- t o use this, do tf init 1st as this needs to load a separate null registry
+null_resource implements standard resource lifecycle but takes no further action.
+Ex: Migration use-case whr files need to be fetched frm ftp_server by ec2 instance n need to be stored at s3.
+u can use null_resource pre-flight check to make sure that connectivity to source FTP svr works fine
+if it fails, it will make sure, that apply is not successful.
+this can be done by using depends_on set to name for null_resource defined in eeparate block.
+other way is to define null_resource block inside main block itself, to avoid using depends_on
+Another Example: for creating multiple IPs
+we can also use triggers block to perform operations like join etc, to process info n then place it in files.
+
+Example1:
+resources.tf >>
+resource "aws_eip" "eip1" {
+  vpc = true
+  depends_on = [null_resource.healthcheck]
+  tags = {
+    "Name" = var.name
+  }
+}
+output "eip1" {
+  value = aws_eip.eip1.public_ip
+}
+resource "null_resource" "healthcheck" {
+  provisioner "local-exec" {
+    command = "curl https://googlialkjwfbaksjfh.com"
+  }
+
+}
+
+output >>
+aws_instance.ec2_ins1: Provisioning with 'local-exec'...
+aws_instance.ec2_ins1 (local-exec): Executing: ["/bin/sh" "-c" "echo 172.31.27.86 >> pvt_ip.txt"]
+aws_instance.ec2_ins1: Creation complete after 23s [id=i-0f1f853e8599e8736]
+╷
+│ Error: local-exec provisioner error
+│
+│   with null_resource.healthcheck,
+│   on resources.tf line 124, in resource "null_resource" "healthcheck":
+│  124:   provisioner "local-exec" {
+│
+│ Error running command 'https://googlialkjwfbaksjfh.com': exit status 127. Output: /bin/sh:
+│ https://googlialkjwfbaksjfh.com: No such file or directory
+│
+╵
+
+jasdil@JasDiLMacAir attributes_n_output_values %
+
+Example2:
+resource "aws_eip" "eip1" {
+  vpc = true
+#  depends_on = [null_resource.healthcheck]
+  count = 3
+  tags = {
+    "Name" = var.name
+  }
+}
+resource "null_resource" "healthcheck" {
+  triggers = {
+    latest_ips = join(",",aws_eip.eip1[*].public_ip)
+  }
+  provisioner "local-exec" {
+    command = "echo Latest IPs r ${null_resource.healthcheck.triggers.latest_ips} > sample.txt"
+#    command = "curl https://googlialkjwfbaksjfh.com"
+  }
+}
+
+[] DRY (Dont Repeat Yourself) Principle:
+its a principle of s/w development, aimed at reducing repetition of s/w patterns.
+Aimed at avoiding to repeat defining same resource creation block (like for EC2) in multiple files/projects.
+if 2 or more projects hv same resource, basically definition for creation of tht resource is repeated, be it ec2, eip etc
+Solution: Use Centralized Structure.
+centralize tf resources & call out tf files wenever reqd -- helps setup application/infra architecture framework wid re-usability
+invoke file containing definition of creation of a specific resource by using module "source"
+Ex:
+module "<customizedName>" {
+source = "relative/absolute path of tf file tht contains creation of needed resource"
+}
+
+modules/libraries implement same concept of defining commonly used components/functionalities, that can be reused efficiently
+  to help setup/shape architectural framework, that adhere to best practices n set standards for achieving optimal solutions
+
+[] Implementing EC2 module in tf:
+mkdir modules n then under modules, create resource specific folders n tf files in each folder
+(like 1 each for ec2, eip, alb, db, cf, s3 etc)
+
+[] Modules: Benefit, all org/framework specific customizations can b made standard in modules,
+n project AppDev doesnt need to worry abt sticking to standards..kind of wrapper of standards created for them
+set default value for each variable in modules so tht if needed, it can be overridden
+
+Since these variables wid default values, allow users to override values for variables tht u may not want,
+better to set locals in modules, so that their values do not take precedence.
+example, default ingress/egress ports in modules can b set as locals so tht Dev cannot change it.
+
+
+locals {
+ports = 80
+}
+
+
+[] Outputs in modules to invoke each other:
+output "<outputName>" {
+value = <aws_resource_type>.<name_in_resourceCreationBlock>.<arn|id|name>
+}
+
+other file invoking module >>
+module "<moduleName>" {
+source = "path of module"
+}
+invoked in this file as module.<moduleName>.<outputName>
+
+[] tf registry:
+repo of modules written by tf community, this helps get started wid tf more quickly, by leveraging reusable modules.
+Pick verified module displayed with blue tickmark, as tht module would be reviewed n kept up to date by Hasicorp n contributor (AWS usually)
+to use tf registry module, specify src module's path like >>
+module "ec2_ins" {
+source = "terraform-aws-modules/ec2-instance/aws"
+version = "2.13.0"
+# insert needed/reqd variables here
+}
+look for mantory variables to be defined n do read notes section to make sure anything else needs to be overriden frm default
+u can also look at src code specified as github repo url
+
+[] how to publish a module in tf registry:
+can b updated via github repo by signing in to tf registry wid github creds
+module format is terraform<providerName>-<resourceName>. Example: terraform-aws-ec2
+
+Standard Module Structure --> file n directory layout, recommended for reusable modules, distributed as separate repos
+a module should have >>
+1. READ.md
+2. main.tf
+3. variables.tf
+4. outputs.tf
+Optional folders under a module>>
+1. modules
+2. examples
+
+[] tf Workspaces:  kind of namespaces to isolate 1 set of work-related stuff from another
+can hv multiple workspaces wid each workspace can hv diff. set of env variables.
+Ex: Staging workspace , PRD workspace-- can set env specific metadata / key-values
+kind of namespaces n k8s, branching strategy in git etc
+Ex:
+vars.tf >>
+variable "ec2_ins_type" {
+    type = map
+    default = {
+        default = "t2.nano"
+        dev = "t2.micro"
+        stage = "t2.micro"
+        prd = "t2.large"
+    }
+
+}
+
+ec2.tf in modules/ec2 >>
+instance_type = lookup(var.ec2_ins_type,terraform.workspace)
+
+chk workspace >>
+$terraform list
+$terraform show #<-- shows current
+$terraform new dev #<-- to create new one, wenevr u create new one, tf automatically switches u thr.
+like git branch checkout -b <branchName>
+
+directory terraform.tfstate.d gets created if workspace is not set to default,
+  will contain workspace name specific sub directories
+terraform.tfstate is the file created if workspace is set to default, at the time of tf apply
+
+
+[] Terraform + GIT -- Team collaboration
+While committing data to the Git repository,  please avoid pushing your access/secret keys with the code. This is very important.
+
+[] Security challenges wid GIT:
+even if we specify password as a file function, though it doesnt shows password for tht tf file,
+but still it stores password in terraform.tfstate file
+
+[] Module Sources in TF:
+source arg in a module block, tells tf where to find src code for desired child module.
+src can be a local path, tf registry, gothul url, bb url, genetic git repo, http url, s3 bucket etc
+local path should be a relative path
+GIT repos should be prefixed with spl git prefix ::
+after this prefix, any valid GIT URL can be specified to select 1 of protocols supported by Git.
+Example:
+module "test" {
+source = "git::https://github.com/jasjesin/test.git"
+}
+or
+module "storage" {
+source = "git::ssh://jasjesin@github.com/storage.git"
+}
+
+By default, tf will clone n will use default branch in selected repo.
+ref arg can be used to specify a specific version or branch name.
+Example:
+module "test" {
+source = "git::https://github.com/jasjesin/test.git?ref=v1.2.0"
+}
+or u can specify without protocol as well
+module "test" {
+source = "github.com/jasjesin/test.git?ref=main" #<-- main branch, instead of master branch
+}
+
+tf downloads the git repo code under .terraform/modules/<gitfoldername>
+
+[] tf n .gitignore:
+tf files to include in .gitgnore >>
+- .terraform -- gets recreated wid each tf init, add it as **/.terraform/*
+- terraform.tfvars -- contains sensitive data like creds, add it ass *.tfvars
+- terraform.tfstate -- should be stored in remote side, add it as *.tfstate and *.tfstate.*
+- crash.log -- if tf crashes, logs r stored in file called crash.log
+
+[] tf backends: -- backends primarily determine where tf stores its state file.
+by default, tf implicitly uses a backend called local to store its state as a local file on disk.
+Approach >>
+all tf files get into cenral git repo
+all terraform.tfstate specific files should get stored in central backend like s3, consul, k8s, http, etcd, artifactory
+with these central backends, tf supports/allows remote svc related operations
+
+configure backend to s3 or artifactory:
+accessing state in remote svc requires creds,
+some backends act like plain remote disks while
+others support locking state while operations r performed, tht helps prevent conflicts n inconsistencies
+
+[] implementing s3 backend:
+backend.tf >>
+terraform {
+  backend "s3" {
+      bucket = "jasjesin"
+      key = "creds/terraform.tfstate"
+      region = "us-west-1"
+  }
+}
+
+Output >>
+jasdil@JasDiLMacAir eip % $terraform init
+
+Initializing the backend...
+
+Successfully configured the backend "s3"! Terraform will automatically
+use this backend unless the backend configuration changes.
+
+[] state file locking or state locking:
+each time u perform a write operation, tf locks state file automatically,
+to ensure if others also perform write operation at same time, your state file doesnt gets corrupted.
+if state locking fails, tf will not continue to perform operation.
+not all backends support state locking, chk which ones do.
+.terraform.tfstate.locl.info file is generate n specifies ID as well as which other user's operation is in progress
+once other person's work is done, this lock file will be automatically be removed.
+force unlock state >> tf has -force-unlock cmd to manually unlock state if unlocking fails.
+if u unlock the state wen some1 else is holding the lock, it could cause multiple writers.
+force-unlock should be only be used to unlock ur own lock in situation whr unlocking failed.
+
+[] state locking in aws backend:
+by default, s3 doesnt supports state locking functionality
+u need to use DynamoDB table to achieve state locking functionality, whr state locking file will be stored
+
+
+if any change is made in backend.tf, tf init doesnt works n warns like this >>
+
+jasdil@JasDiLMacAir eip % $terraform init
+
+Initializing the backend...
+╷
+│ Error: Backend configuration changed
+│
+│ A change in the backend configuration has been detected, which may require migrating existing state.
+│
+│ If you wish to attempt automatic migration of the state, use "terraform init -migrate-state".
+│ If you wish to store the current configuration with no changes to the state, use "terraform init
+│ -reconfigure".
+╵
+
+jasdil@JasDiLMacAir eip %
+
+This time, state lock is supported >>
+jasdil@JasDiLMacAir eip % $terraform apply -auto-approve
+╷
+│ Error: Error acquiring the state lock
+│
+│ Error message: ConditionalCheckFailedException: The conditional request failed
+│ Lock Info:
+│   ID:        e9babbc3-0e6e-91ec-7569-b0e989d68b30
+│   Path:      jasjesin/creds/terraform.tfstate
+│   Operation: OperationTypeApply
+│   Who:       jasdil@JasDiLMacAir
+│   Version:   1.3.6
+│   Created:   2023-01-08 04:12:42.344243 +0000 UTC
+│   Info:
+│
+│
+│ Terraform acquires a state lock to protect the state from being written
+│ by multiple users at the same time. Please resolve the issue above and try
+│ again. For most commands, you can disable locking with the "-lock=false"
+│ flag, but this is not recommended.
+╵
+jasdil@JasDiLMacAir eip %
+<<add dynamoDB scrnshot>>
+
+
+
+[] tf state mgmt: do not modify state file directly, use tf state cmds for any modification.
+$terraform state <list|mv|pull|push|rm|show>
+$terraform state list -- shows resources, alrdy created
+$terraform state mv <src> <destination> -- moves items in tf state.
+        can b used wen u want to rename existing resource without destroying/recreating it
+        this cmd will output a backup copy of state prior to saving any changes.
+$terraform state pull -- will manually download & output state frm remote state
+
+jasdil@JasDiLMacAir eip % $terraform state pull
+{
+  "version": 4,
+  "terraform_version": "1.3.6",
+  "serial": 3,
+  "lineage": "9335137a-38dc-a2a6-6f5d-b701f4acc959",
+  "outputs": {},
+  "resources": [],
+  "check_results": null
+}
+
+jasdil@JasDiLMacAir eip %
+
+$terraform state rm <resource> -- will remove specified resource frm tf state n will no longer b monitored
+                               -- resource wont be destory, will keep running, but wont b monitored anymore by tf
+
+
+[] connecting remote states:
+terraform_remote_state data source retrieves
+    root module output values from other tf configs, using latest state snapshot from remote backend.
+
+Example: 2 projects, 1 generates public EIPs n stores in s3 bucket,
+2nd project needs to whitelist those public IPs by creating a new SG (n/w team work), by accessing that s3 bucket
+sg.tf >>
+cidr_blocks = ["${data.terraform_remote_state.eip.outputs.eip1}/32"]
+data "terraform_remote_state" "eip" {
+  backend = "s3"
+  config = {
+      bucket = "jasjesin"
+      key = "creds/terraform.tfstate"
+      region = "us-west-1"
+      dynamodb_table = "tfstatelock"
+  }
+}
+output >>
+from eip.tf>>
+Outputs:
+
+eip1 = "54.151.54.153"
+jasdil@JasDiLMacAir eip %
+from sg.tf >>
++ {
+    + cidr_blocks      = [
+        + "54.151.54.153/32",
+      ]
+    + description      = ""
+    + from_port        = 443
+    + ipv6_cidr_blocks = []
+    + prefix_list_ids  = []
+    + protocol         = "tcp"
+    + security_groups  = []
+    + self             = false
+    + to_port          = 443
+
+[] importing existing resources wid tf import:
+  tf is able to import existing infra. this allows to take resources, created earlier & bring it under tf mgmt
+  <<add tf_import>>
+  1st create resource specific tf files manually, then use tf import to import those to get tfstate file created
+  $terraform import aws_instance.ec2 <running_instanceID>
+  to validate, run terraform plan to make sure tht no new changes r introduced by tf
+
+  current implementation of tf import can only import resources into state. It does NOT generate configuration
+  future version of tf will also generate config.
+
+  due to this, prior to running tf impor, it is necessary to write manually a resource config block for resource,
+  to which imported object will be mapped.
+
+[] Handling Access & Secret keys:
+As long as you configure ur aws cli, u DO NOT need to provide credential details in tf files,
+as tf picks it frm ur aws credentials file
+
+[] setup same resource type in multiple regions or accounts:
+alias variable allows to have multiple regions defined in 2 providers blocks
+if alias is not defined, then that region stays default.
+
+1. same resource type in 2 different regions
+if alias is defined, then specify provider = "aws.<aliasName>"
+provider.tf >>
+provider "aws" {
+  region = var.location.west
+}
+provider "aws" {
+  alias = "east"
+  region = var.location.east
+}
+eip.tf >>
+resource "aws_eip" "eip1" {
+  vpc = true
+}
+resource "aws_eip" "eip2" {
+  vpc = true
+  provider = aws.east
+}
+
+2. same resource type in 2 different accounts:
+provider.tf >>
+provider "aws" {
+  region = var.location.west
+}
+provider "aws" {
+  alias = "awsterraform"
+  profile = "terraform"
+  region = var.location.east
+}
+eip.tf >>
+resource "aws_eip" "eip1" {
+  vpc = true
+}
+resource "aws_eip" "eip2" {
+  vpc = true
+  provider = aws.awsterraform
+}
+
+[] tf wid STS: for multiple aws accounts, setup infra using delegation
+setup an identity a/c (or maybe role?) wid single set of user name n password or access & secret keys
+no need to worry abt assuming role thru aws, cuz its natively supported thru tf
+aws sts assume-role --role-arn <roleARN> --role-session-name testing #<-- fetches temp creds to login as assumed a/c
+access key, session key n session token
+provider.tf >>
+provider "aws" {
+region = "us-west-1"
+assume_role {
+role_arn = "<roleARN>"
+session_name = "<DepttName_or_ProjectName>"
+}
+}
+
+[] creds / sensitive pmtrs:
+use sensitive = true , this helps make sure output is not posted in state file or during execution over console
+
+[] Hashicorp vault:
+allows orgs to securely store secrets like tokens,passwords,certs along with access mgmt for protecting secrets
+thru cli or gui, can fetch temp creds to do work till those creds expire
+vault read database/creds/readonly #<-- returns temp creds wid lease duration, n lease renewal eligibility to be true or false
+
+to login to a specific node, can request creds directly from vault to ssh on a node >>
+vault write ssh/creds/otp_key_role ip=<ipAddr> #<-- will return temp creds as ec2-user, wid ip, ke, key-type as otp n lease duration
+
+vault can encrypt or decrypt data as well
+
+
+[] tf & vault integration:
+vault allows tf to read from, write to & configure vault.
+how to inject creds to vault >>
+provider "vault" {
+address = "http://<IP>:<port>"
+}
+data "vault_generic_secret" "test" {
+path = "secret/dbcreds"
+}
+output "vault_secrets" {
+value = data.vault_generic_secret.test.data_json
+sensitive = "true"
+}
+
+interacting wid vault will store/persist secrets in state file. so make sure to keep state file secure
+
+[] tf cloud: manages tf in consistent n reliable env wid variable features like access ctrls,
+              pvt registry for sharing modules, policy ctrls & others
+
+[] Sentinel is policy-as-code framework integrated wid HashiCorp Enterprise products
+It enables fine-grained, logic-based policy decisions & can b extended to use info frm external resources
+these r executed after tf plan n before tf apply, i.e,
+tf plan --> sentinel checks --> tf apply
+
+u can write policies in sentinel checks, policies like ec2 ins type shouldnt be t2.large etc
+create policy sets n store in workspace
+
+[] Air Gapped Env: Air Gap is a n/w security measure, employed to ensure that
+                  a secure computer n/w is physically isolated from unsecured n/w such as public internet
+Due to no n/w connectivity inside air gapped Environment, these r used in super secured systems like
+- military/governmental computer n/w sys
+- financial computer sys such as stock exchanges
+- industrial ctrl sys such as SCADA in Oil & Gas fields
+
+
+Thank you Ilyas.
+
+Many attorneys told that it's taking 2 weeks nowadays for LCA to come back approved.
+Based on that, next week will be last week to file LCA for my visa transfer.
+
+Would be really helpful if LCA-initiation could be fast-tracked at the earliest, post-approval on Tuesday.

@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap
+data:
+  url: test-svc                   #<-- svc name, defined under metadata, from test.yaml

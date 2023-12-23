@@ -1,0 +1,178 @@
+Basic k8s Resources:
+1. Pods
+2. Svc
+3. ReplicatSet
+4. Deployment
+
+k8s -- airbnb -- consultancies -- orchestration
+
+[] Tools to install for k8s setup:
+1. kubectl -- online tool, tht needs to be installed, for deploying & managing apps on k8s, it interacts wid cluster resources.
+2. docker -- to deploy n run app, docker comes wid k8s also. Basically u can hv k8s cluster running on docker
+3. VS Studio / Atom -- to write code (optional)
+
+[1] Pod:
+  Most basic entity in k8s.
+  Pod is a wrapper around container(s), usually has one container only.
+      Container is a pkg version of an app wid needed s/w, and can b run on any machine
+  k8s manages the pods. So if a pod goes down, k8s monitors n brings it back up with next avl IP
+  Pod
+  |_____container1
+        |______app1
+  |_____container2
+        |______app2
+
+  Disadvantages of Pod:
+    Single pod, if dies, needs to be brought up manually
+
+[2] ReplicaSet:
+   It is a wrapper for pod.
+   k8s makes sure that defined no. of pods alwys run at any point of time
+   in case of failure, replicaSet will brings/starts up another version pod
+   in practice, we do not write explicitly about just pod, but rather about replicaSet
+   Disadvantage: deployment for version change is manual, can lead to downtime
+
+[3] Deployments:
+    helps perform rolling version updates or rollback wid zero downtime
+    needed to deploy new app, update existing app wid new version or rollback
+    new version is deployed on a new replicaSet, n then existing replicaSet is brought down, this can be painful, if done manually
+    Deployment takes care of creating n replacing replicaSet automatically.
+
+
+
+[] Docker:
+   Containers contain app code, dependencies (needed s/w) and OS version. Thus, containers r pkg version of app
+   Docker creates n runs containers.
+
+3 things to remember abt Docker
+1. Container: self contained running app
+2. Image: binary, containing pkgd version of app,
+          if u run the image, then it becomes container.
+          Container is an instance of image
+3. Dockerfile: definition of image, helps in creating the image
+          u specify in the file abt wht image will contain
+
+So, start off wid a docker file to specify wht u want in image
+  execute dockerfile to get image create, and then run image to get a container created
+  Dockerfile -> image -> container
+
+[] Dockerfile
+FROM nginx:alpine <-- use nginx as svr
+COPY index.html /usr/share/nginx/html <-- copy file thr for svr to use it
+
+[] cmds to create image once Dockerfile is ready
+  docker login <login to dockerhub a/c or JFrog artifactory or AWS ECR>
+  docker build -t "app:v01" . <pick Dockerfile frm current path> <-- this gives tag-name
+  docker images
+  docker tag app:v01 jasjesin/docker_images:v01 <-- this folder structure should b built in remote repo
+  docker push jasjesin/docker_images:v01
+
+[] How to write & run a pod:
+FileName:pod.yaml
+
+Content:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app
+  labels:
+    mylabelname: app <-- this is used to discover this pod
+spec:
+  containers:
+  - name: app
+    image: jasjesin/docker_images:v01
+
+Command to run:
+kubectl apply -f pod.yaml
+kubectl get pods
+
+[] How to run & write a svc:
+FileName: service.yaml
+
+Content:
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+spec:
+  selector:
+    mylabelname: app <-- same as defined in pod.yaml
+  ports:
+  - name: http
+    port: 80
+    nodePort: 8080 <-- this is the port no. on localhost
+  type: NodePort
+
+Command to run:
+kubectl apply -f service.yaml
+
+[] How to write & run replicaSet: helps automate bring up pods automatically
+FileName: replicaset.yaml
+
+Content:
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: app-replicaset
+spec:
+  selector:
+    matchLabels: <-- tells which pod it needs to manage
+      mylabelname: app <-- same as defined in pod.yaml
+  replicas: 1
+  template: <-- template of pod to be brought up
+    metadata:
+      labels:
+        mylabelname: app
+    spec:
+      containers:
+      - name: app
+        image: jasjesin/docker_images:v01
+
+
+Command to run:
+kubectl apply -f replicaset.yaml
+kubectl get replicas
+kubectl get pods
+
+[] How to write & run a Deployment:
+FileName: deployment.yaml
+
+Content:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-replicaset
+spec:
+  minReadySeconds: 1 <-- this is only additional line v/s replicaset.yaml, means new version should b ready for at least 1 sec, before replacing existing version
+  selector:
+    matchLabels: <-- tells which pod it needs to manage
+      mylabelname: app <-- same as defined in pod.yaml
+  replicas: 1
+  template: <-- template of pod to be brought up
+    metadata:
+      labels:
+        mylabelname: app
+    spec:
+      containers:
+      - name: app
+        image: jasjesin/docker_images:v01
+
+
+Command to run:
+kubectl apply -f deployment.yaml
+kubectl get all
+
+[] Rolling update:
+1. change version
+2. kubectl apply -f deployment.yaml
+
+It is also possible to use Kubernetes on top of Minikube.
+
+
+
+Minikube is a tool to run Kubernetes locally on your machine. It can run inside a virtual machine situated on your laptop to try out Kubernetes locally. This is also a popular way to test out Kubernetes without actually downloading the entire version of it.
+
+
+
+This is a link which explains how to use Minikube to run Kubernetes with a simple example:
+https://github.com/emailtovamos/kubernetes-minikube-tutorial.

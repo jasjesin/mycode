@@ -1,0 +1,37 @@
+container vs pod
+
+pkg app as a container, wrapped it inside a pod, declared via manifest file
+
+app code written in a specific language, built into a container image & stored in registry.
+At this point, app svc is containerized.
+
+Pod is a wrapper, tht allows container to run in K8s cluster
+
+[] Bare Minimum Atomic Unit of Scheduling:
+VMware --> VM
+Docker --> container
+k8s    --> pod (cuz we cannot run containers directly in k8s, container must alwys run inside a pod)
+
+Pod means group of whales. Whale is the logo of Docker container.
+So, Pod means group of Docker containers.
+
+Pod can run multiple containers, but we avoid it.
+Pod is a ring-faced Environment, to run containers. CPU/RAM is defined at Pod lvl, not at container lvl
+Pod itself doesnt runs anything. Its just a sandbox for hosting containers.
+Pod ring-fences an area of OS, builds n/w stack, bunch of kernel namespaces & runs one or more containers in it.
+If we run multiple containers in a Pod, they all share same Environment resources like memory, volume, n/w stack etc
+All containers in same Pod share same IP, i.e., Pod's IP.
+
+Example, if a Pod is assigned 2GB memory, with a container stored in it.
+If we scale containers inside that Pod to 10, then each container will get just 200MB, its like lot of ppl inside a single room.
+Better to scale pods, than containers, to ensure each container continues to get good amt of memory.
+
+Pod is a single atomic operation. That means, either a Pod is completely deployed or not deployed at all.
+There's nvr a situation where a Pod is partially deployed.
+This is also true for multi-container Pod, i.e., all containers in same Pod run on same node.
+
+Pods r mortal. Pods r created, live & die.
+If Pods die, we do not bring them back to life.
+Instead, k8s starts a new one in its place, wid new ID & IP.
+If Pods r managed via Deployments or DaemonSets, they get replaced wid newer ID & IP, wen they fail.
+This also happens wen scaling operations r performed, causing lot of IP churn.

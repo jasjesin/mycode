@@ -1,0 +1,353 @@
+https://medium.com/bb-tutorials-and-thoughts/250-practice-questions-for-terraform-associate-certification-7a3ccebe6a1a
+
+Multiple ways to use variables in TF
+
+1. Define in variables.tf with default values
+    If default is not specified, then upon executing terraform apply, value for each variable needs to be typed in manually
+
+2. specify values as arguments in CLI, by specifying -var for each new variable to be passed, like
+      terraform apply -var "filename=abcd.txt" -var "prefix=Mrs"
+
+3. Export variables as TF_VAR_<variableName> n then executing terraform apply, like
+export TF_VAR_filename="abcd.txt"
+export TF_VAR_content="Testing changes"
+...
+...
+terraform apply
+
+4. specify key-value pairs of variables in
+  terraform.tfvars or terraform.tfvars.json or
+  *.auto.tfvars or *.auto.tfvars.json or
+  *.tfvars or *.tfvars.json file as
+filename = "abcd.txt"
+prefix = "Mrs"
+..
+..
+terraform apply
+
+if variables r added in a specific tfvars file like jasProject.tfvars, then execute as
+terraform apply -var-file jasProject.tfvars
+
+Precedence/Priority Sequence given to type of variable definition
+1. -var or -var-file (like jasProject.tfvars)
+2. *.auto.tfvars (in alphabetical order)
+3. terraform.tfvars
+4. Env variables
+
+
+terraform output --> provides list of output values generated.
+  useful to supply values as inputs to ansible or shell scripts
+
+jasdil@JasDiLMacAir bin % ./terraform output
+test = "Mr:egret"
+
+jasdil@JasDiLMacAir bin % ./terraform output test
+"Mr:egret"
+jasdil@JasDiLMacAir bin %
+
+jasdil@JasDiLMacAir bin % ./terraform plan --refresh=false
+# helps avoid delay in execution time in refreshing cache, value is picked frm last stored cached state n diff is shown
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # local_file.jas1 must be replaced
+-/+ resource "local_file" "jas1" {
+      ~ content              = <<-EOT # forces replacement
+
+
+          -  Testing invocation of output of other resource: Mr:egret
+          +  Testing with invocation of output of other resource: Mr:egret
+
+        EOT
+      ~ id                   = "d1ff464a99350052dcdc319d7bfdc3ca5a761176" -> (known after apply)
+        # (3 unchanged attributes hidden)
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take exactly these actions if you run "terraform apply"
+now.
+jasdil@JasDiLMacAir bin %
+
+# to avoid running terraform apply each time, for syntax check, use terraform validate
+jasdil@JasDiLMacAir bin % ./terraform validate
+Success! The configuration is valid.
+
+jasdil@JasDiLMacAir bin %
+
+jasdil@JasDiLMacAir bin % ./terraform format
+Terraform has no command named "format".
+
+To see all of Terraform's top-level commands, run:
+  terraform -help
+
+jasdil@JasDiLMacAir bin % ./terraform fmt #<-- formats indentation of code
+main.tf
+variables.tf
+jasdil@JasDiLMacAir bin %
+
+terraform show #<-- shows current state of infrastructure, as seen by terraform
+terraform show -json #<-- shows in json format
+
+jasdil@JasDiLMacAir bin % ./terraform show -json
+{"format_version":"1.0","terraform_version":"1.3.6","values":{"outputs":{"test":{"sensitive":false,"value":"Mr:egret","type":"string"}},"root_module":{"resources":[{"address":"local_file.jas","mode":"managed","type":"local_file","name":"jas","provider_name":"registry.terraform.io/hashicorp/local","schema_version":0,"values":{"content":"\n Statement2 \n","content_base64":null,"directory_permission":"0777","file_permission":"0700","filename":"/Users/jasdil/Documents/Learnings/terraform/projects/local/bin/projects/jas.txt","id":"3b0c93eeaf6cea79453f01f780a20351e4de0993","sensitive_content":null,"source":null},"sensitive_values":{}},{"address":"local_file.jas1","mode":"managed","type":"local_file","name":"jas1","provider_name":"registry.terraform.io/hashicorp/local","schema_version":0,"values":{"content":"\n \n Testing invocation of output of other resource: Mr:egret \n \n","content_base64":null,"directory_permission":"0777","file_permission":"0700","filename":"/Users/jasdil/Documents/Learnings/terraform/projects/local/bin/projects/jas1.txt","id":"d1ff464a99350052dcdc319d7bfdc3ca5a761176","sensitive_content":null,"source":null},"sensitive_values":{},"depends_on":["random_pet.test"]},{"address":"random_pet.test","mode":"managed","type":"random_pet","name":"test","provider_name":"registry.terraform.io/hashicorp/random","schema_version":0,"values":{"id":"Mr:egret","keepers":null,"length":1,"prefix":"Mr","separator":":"},"sensitive_values":{}}]}}}
+jasdil@JasDiLMacAir bin %
+
+terraform providers #<-- shows list of all providers used for setup
+
+jasdil@JasDiLMacAir bin % ./terraform providers
+
+Providers required by configuration:
+.
+├── provider[registry.terraform.io/hashicorp/local]
+└── provider[registry.terraform.io/hashicorp/random]
+
+Providers required by state:
+
+    provider[registry.terraform.io/hashicorp/local]
+
+    provider[registry.terraform.io/hashicorp/random]
+
+jasdil@JasDiLMacAir bin %
+
+
+terraform providers mirror <newPath> #<-- mirrors provider plugins of current config to new directory
+
+jasdil@JasDiLMacAir bin % ./terraform providers mirror /Users/jasdil/Documents/Learnings/terraform/projects/local_mirror
+- Mirroring hashicorp/random...
+  - Selected v3.4.3 with no constraints
+  - Downloading package for darwin_amd64...
+  - Package authenticated: signed by HashiCorp
+- Mirroring hashicorp/local...
+  - Selected v2.2.3 with no constraints
+  - Downloading package for darwin_amd64...
+  - Package authenticated: signed by HashiCorp
+jasdil@JasDiLMacAir bin %
+
+
+terraform refresh #<-- syncs terraform wid real world infrastructure
+# if any change made locally outside of terraform's control,
+# terraform will pick that change to update state file but not infrastructure.
+# this terraform refresh is used internally by terraform plan n apply
+
+jasdil@JasDiLMacAir bin % ./terraform refresh
+random_pet.test: Refreshing state... [id=Mr:egret]
+local_file.jas: Refreshing state... [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas1: Refreshing state... [id=d1ff464a99350052dcdc319d7bfdc3ca5a761176]
+
+Outputs:
+
+test = "Mr:egret"
+jasdil@JasDiLMacAir bin %
+
+terraform graph #<-- creates visual graph of dependencies, in a format called dot, in terraform config or in execution plan
+
+jasdil@JasDiLMacAir bin % ./terraform graph
+digraph {
+	compound = "true"
+	newrank = "true"
+	subgraph "root" {
+		"[root] local_file.jas (expand)" [label = "local_file.jas", shape = "box"]
+		"[root] local_file.jas1 (expand)" [label = "local_file.jas1", shape = "box"]
+		"[root] provider[\"registry.terraform.io/hashicorp/local\"]" [label = "provider[\"registry.terraform.io/hashicorp/local\"]", shape = "diamond"]
+		"[root] provider[\"registry.terraform.io/hashicorp/random\"]" [label = "provider[\"registry.terraform.io/hashicorp/random\"]", shape = "diamond"]
+		"[root] random_pet.test (expand)" [label = "random_pet.test", shape = "box"]
+		"[root] var.bella" [label = "var.bella", shape = "note"]
+		"[root] var.file-content" [label = "var.file-content", shape = "note"]
+		"[root] var.filename" [label = "var.filename", shape = "note"]
+		"[root] var.length" [label = "var.length", shape = "note"]
+		"[root] var.password_change" [label = "var.password_change", shape = "note"]
+		"[root] var.prefix" [label = "var.prefix", shape = "note"]
+		"[root] var.separator" [label = "var.separator", shape = "note"]
+		"[root] local_file.jas (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/local\"]"
+		"[root] local_file.jas (expand)" -> "[root] var.file-content"
+		"[root] local_file.jas (expand)" -> "[root] var.filename"
+		"[root] local_file.jas1 (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/local\"]"
+		"[root] local_file.jas1 (expand)" -> "[root] random_pet.test (expand)"
+		"[root] local_file.jas1 (expand)" -> "[root] var.filename"
+		"[root] output.test (expand)" -> "[root] random_pet.test (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/local\"] (close)" -> "[root] local_file.jas (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/local\"] (close)" -> "[root] local_file.jas1 (expand)"
+		"[root] provider[\"registry.terraform.io/hashicorp/random\"] (close)" -> "[root] random_pet.test (expand)"
+		"[root] random_pet.test (expand)" -> "[root] provider[\"registry.terraform.io/hashicorp/random\"]"
+		"[root] random_pet.test (expand)" -> "[root] var.length"
+		"[root] random_pet.test (expand)" -> "[root] var.prefix"
+		"[root] random_pet.test (expand)" -> "[root] var.separator"
+		"[root] root" -> "[root] output.test (expand)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/local\"] (close)"
+		"[root] root" -> "[root] provider[\"registry.terraform.io/hashicorp/random\"] (close)"
+		"[root] root" -> "[root] var.bella"
+		"[root] root" -> "[root] var.password_change"
+	}
+}
+
+jasdil@JasDiLMacAir bin %
+
+./terraform graph | dot -Tsvg > ~/Downloads/graph.svg
+
+
+mutable infra --> in-place upgrades of softwares, causes configuration drift, like version of 1 of dependencies is not met
+immutable infra --> destroy existing n bring up new infra wid newer version...basically no need to change/upgrade softwares
+
+
+terraform, by default, destroys a resource 1st n then creates new resource.
+In HA PRD Distributed Environment, we cant afford to have svr destoryed 1st...we need to have new 1 created 1st n then destroyed
+To make this happen, use lifecycle rules in resource block.
+
+
+Example of deletion 1st >>
+jasdil@JasDiLMacAir bin % ./terraform apply -auto-approve
+random_pet.test: Refreshing state... [id=Mr:egret]
+local_file.jas: Refreshing state... [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas1: Refreshing state... [id=d1ff464a99350052dcdc319d7bfdc3ca5a761176]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # local_file.jas1 must be replaced
+-/+ resource "local_file" "jas1" {
+      ~ content              = <<-EOT # forces replacement
+
+
+          -  Testing invocation of output of other resource: Mr:egret
+          +  Testing the invocation of output of other resource: Mr:egret
+
+        EOT
+      ~ file_permission      = "0700" -> "0770" # forces replacement
+      ~ id                   = "d1ff464a99350052dcdc319d7bfdc3ca5a761176" -> (known after apply)
+        # (2 unchanged attributes hidden)
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+local_file.jas1: Destroying... [id=d1ff464a99350052dcdc319d7bfdc3ca5a761176]
+local_file.jas1: Destruction complete after 0s
+local_file.jas1: Creating...
+local_file.jas1: Creation complete after 0s [id=e5e0e2caf77f562035316078b1564cad217c251f]
+
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+Outputs:
+
+test = "Mr:egret"
+jasdil@JasDiLMacAir bin %
+
+To avoid this, add
+lifecycle {
+  create_before_destroy = true
+}
+
+
+jasdil@JasDiLMacAir bin % ./terraform apply -auto-approve
+random_pet.test: Refreshing state... [id=Mr:egret]
+local_file.jas: Refreshing state... [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas1: Refreshing state... [id=e5e0e2caf77f562035316078b1564cad217c251f]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
++/- create replacement and then destroy
+
+Terraform will perform the following actions:
+
+  # local_file.jas must be replaced
++/- resource "local_file" "jas" {
+      ~ file_permission      = "0700" -> "0770" # forces replacement
+      ~ id                   = "3b0c93eeaf6cea79453f01f780a20351e4de0993" -> (known after apply)
+        # (3 unchanged attributes hidden)
+    }
+
+  # local_file.jas1 must be replaced
+-/+ resource "local_file" "jas1" {
+      ~ file_permission      = "0770" -> "0775" # forces replacement
+      ~ id                   = "e5e0e2caf77f562035316078b1564cad217c251f" -> (known after apply)
+        # (3 unchanged attributes hidden)
+    }
+
+Plan: 2 to add, 0 to change, 2 to destroy.
+local_file.jas1: Destroying... [id=e5e0e2caf77f562035316078b1564cad217c251f]
+local_file.jas: Creating...
+local_file.jas1: Destruction complete after 0s
+local_file.jas: Creation complete after 0s [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas (deposed object 9de1f5d2): Destroying... [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas1: Creating...
+local_file.jas: Destruction complete after 0s
+local_file.jas1: Creation complete after 0s [id=e5e0e2caf77f562035316078b1564cad217c251f]
+
+Apply complete! Resources: 2 added, 0 changed, 2 destroyed.
+
+Outputs:
+
+test = "Mr:egret"
+jasdil@JasDiLMacAir bin %
+
+Lifecycle rule was applied to jas only, not to jas1..see the difference >>
+
+local_file.jas1: Destroying... [id=e5e0e2caf77f562035316078b1564cad217c251f]
+local_file.jas1: Destruction complete after 0s
+local_file.jas1: Creating...
+local_file.jas1: Creation complete after 0s [id=e5e0e2caf77f562035316078b1564cad217c251f]
+
+local_file.jas: Creating...
+local_file.jas: Creation complete after 0s [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas (deposed object 9de1f5d2): Destroying... [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+local_file.jas: Destruction complete after 0s
+
+
+The following ensures that old resource is not deleted. This is helpful to prevent resources frm accidental deletion >>
+lifecycle {
+   prevent_destroy = true
+ }
+
+ jasdil@JasDiLMacAir bin % ./terraform apply
+ local_file.jas: Refreshing state... [id=3b0c93eeaf6cea79453f01f780a20351e4de0993]
+ random_pet.test: Refreshing state... [id=Mr:egret]
+ local_file.jas1: Refreshing state... [id=e5e0e2caf77f562035316078b1564cad217c251f]
+ ╷
+ │ Error: Instance cannot be destroyed
+ │
+ │   on main.tf line 10:
+ │   10: resource "local_file" "jas1" {
+ │
+ │ Resource local_file.jas1 has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed. To avoid this error and
+ │ continue with the plan, either disable lifecycle.prevent_destroy or reduce the scope of the plan using the -target flag.
+ ╵
+ jasdil@JasDiLMacAir bin %
+
+
+# To avoid values frm getting changed for specific variables like AMI ID, use following >>
+ lifecycle {
+   ignore_changes = [
+     length
+   ]
+
+
+Data source to be used as input in Terraform file, from files, not maintained by TF, but generated n placed by python scripts etc
+Data Source is only used for reading data, no editing etc allowed.
+Data Sources r also called as Data Resources
+
+
+Meta arguments: help in creating multiple resources, can b used in any of resource blocks.
+depends_on & lifecycle rules r two meta arguments alrdy used.
+
+for_each meta argument:
+
+
+
+Version constraint #<-- to restrict to use specific version only
+terraform {
+  required_providers {
+    local = {
+        source = "hashicorp/local"
+        version = "1.4.0"
+# or use      version = "!= 1.4.0" #<-- this will cause usage of previous or version lower than 1.4.0
+# or use      version = "> 1.4.0"  #<-- this will cause usage of version higher than 1.4.0
+# or use      version = "> 1.4.0, < 1.6.0, != 1.5.0"  #<-- u can add complexities
+    }
+  }
+}

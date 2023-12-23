@@ -1,0 +1,327 @@
+k8s questions asked
+======================================
+short intro abt urself...whts current expectation
+
+wht kind of n/w would u suggest to work on k8s environment
+on prem setup, wht n/w would u prefer,
+  n/w arch n security recommendations
+
+wht protocol to connect k8s wid hybrid environment
+aws setup n hybrid svrs -- to connect to k8s machine...how will u set that up
+
+what are the types of application that you have worked on, in k8s
+
+deployment.yaml to deploy couple of containers, wht procedure happens at backend
+
+purpose of etcd, api svr
+
+basic things to consider before setting up k8s cluster
+
+wht is stateful set n y we need to opt for it
+y do we prefer stateful set?
+
+how to pass secrets to app...how to set that up in k8s, vry native to k8s
+how to create n manage a secret in k8s
+
+how will u set a pod wid root access in root mode in k8s?
+======================================
+                    wht kind of n/w would u suggest to work on k8s environment
+                    on prem setup, wht n/w would u prefer,
+                      n/w arch n security recommendations
+
+
+  First, let's review the basic networking types in a Kubernetes cluster:
+  Container-to-container networking.
+  Pod-to-pod networking.
+  Pod-to-service networking.
+  Internet-to-service networking.
+
+Kubernetes follows an “IP-per-pod” model where each pod get assigned an IP address and all containers in a single pod share the same network namespaces and IP address.
+
+Kubernetes networking addresses four concerns:
+Containers within a Pod use networking to communicate via loopback.
+Cluster networking provides communication between different Pods.
+The Service API lets you expose an application running in Pods to be reachable from outside your cluster.
+
+Kubernetes does not need any internet access for normal operation when all required containers and components are provided by the private repository.
+If you are deploying only a base Kubernetes cluster without a Service Mesh, you will run into the following issues: There is no security between services. Tracing a service latency problem is a severe challenge. Load balancing is limited.
+Kubernetes manages networking through CNI's on top of docker and just attaches devices to docker
+There are three common Docker network types – bridge networks, used within a single host, overlay networks, for multi-host communication, and macvlan networks which are used to connect Docker containers directly to host network interfaces.
+A Pod can communicate with another Pod by directly addressing its IP address, but the recommended way is to use Services. A Service is a set of Pods, which can be reached by a single, fixed DNS name or IP address. In reality, most applications on Kubernetes use Services as a way to communicate with each other.
+Project Calico, or just Calico, is another popular networking option in the Kubernetes ecosystem.
+While Flannel is positioned as the simple choice, Calico is best known for its performance, flexibility, and power.
+Use kubectl exec -it POD_NAME /bin/SHELL (where shell is often bash if it is installed in the container, or sh otherwise) to get a shell running inside the pod. The shell actually runs inside one of its containers.
+When kubectl accesses the cluster it uses a stored root certificate and client certificates to access the server. (These are installed in the ~/. kube directory). Since cluster certificates are typically self-signed, it may take special configuration to get your http client to use root certificate
+There are four types of Kubernetes services — ClusterIP , NodePort , LoadBalancer and ExternalName
+Deployments are well-suited for stateless applications that use ReadOnlyMany or ReadWriteMany volumes
+mounted on multiple replicas, but are not well-suited for workloads that use ReadWriteOnce volumes.
+For stateful applications using ReadWriteOnce volumes, use StatefulSets.
+Stateful applications save data to persistent disk storage for use by the server, by clients, and by other applications.
+An example of a stateful application is a database or key-value store to which data is saved and
+retrieved by other applications.
+A stateless system sends a request to the server and relays the response (or the state) back without storing any information.
+On the other hand, stateful systems expect a response, track information, and resend the request if no response is received.
+Two commonly used ones are Deployments and StatefulSets.
+A Deployment manages multiple pods by automating the creation, updating, and deletion of ReplicaSets.
+By contrast, a StatefulSet helps orchestrate stateful pods by guaranteeing the ordering and uniqueness of pod replicas.
+Each microservice can either be stateless or stateful. A system that uses microservices typically has a stateless web and/or mobile application that uses stateless and/or stateful services. Stateless microservices do not maintain any state within the services across calls.
+pod is the smallest unit of Kubernetes used to house one or more containers and run applications in a cluster,
+while deployment is a tool that manages the performance of a pod
+PVs are volume plugins like Volumes, but have a lifecycle independent of any individual Pod that uses the PV.
+This API object captures the details of the implementation of the storage,
+  be that NFS, iSCSI, or a cloud-provider-specific storage system.
+A PersistentVolumeClaim (PVC) is a request for storage by a user.
+PVs are cluster resources provisioned by an administrator, whereas PVCs are a user's request for storage and resources. PVCs consume PVs resources, but not vice versa. A PV is similar to a node in terms of cluster resources, while a PVC is like a Pod in the context of cluster resource consumption
+JSON Web Tokens (JWT) are referred to as stateless because the authorizing server needs to maintain no state; the token itself is all that is needed to verify a token bearer's authorization
+A pod is a unit of replication on a cluster;
+A cluster can contain many pods, related or unrelated [and] grouped under the tight logical borders called namespaces.”
+Namespaces are a way to organize clusters into virtual sub-clusters —
+  they can be helpful when different teams or projects share a Kubernetes cluster.
+Any number of namespaces are supported within a cluster,
+  each logically separated from others but with the ability to communicate with each other.
+Helm is an open-source graduated CNCF project originally created by DeisLabs as a third-party utility, now known as the package manager for Kubernetes, focused on automating the Kubernetes applications lifecycle in a simple and consistent way.
+Helm Charts are simply Kubernetes YAML manifests combined into a single package that can be advertised to your Kubernetes clusters. Once packaged, installing a Helm Chart into your cluster is as easy as running a single helm install, which really simplifies the deployment of containerized applications.
+Kubernetes allow you to limit the number of process IDs (PIDs) that a Pod can use.
+You can also reserve a number of allocatable PIDs for each node for use by the operating system and
+daemons (rather than by Pods).
+Process IDs (PIDs) are a fundamental resource on nodes.
+Create PVC without a static PV:
+You can create a PVC based on storage class specifications.
+If you omit the storage class, it will use the default storage class.
+A Kubernetes cluster is a set of nodes that run containerized applications. Containerizing applications packages an app with its dependences and s
+Kubernetes uses a YAML file called kubeconfig to store cluster authentication information for kubectl . kubeconfig contains a list of contexts to which kubectl refers when running commands. By default, the file is saved at $HOME/. kube/config . A context is a group of access parameters.
+How do you debug a pod?
+Configuration.
+Apply Pod Security Standards at the Cluster Level. Apply Pod Security Standards at the Namespace Level. Restrict a Container's Access to Resources with AppArmor. Restrict a Container's Syscalls with seccomp.
+Services.
+Can two pods mount same volume?
+If the PVC has a accessMode of ReadWriteMany then multiple pods can mount the volumes at the same time.
+A Kubernetes volume is a directory that contains data accessible to containers in a given Pod in the orchestration and scheduling platform. Volumes provide a plug-in mechanism to connect ephemeral containers with persistent data stores elsewhere.
+The "one-container-per-Pod" model is the most common Kubernetes use case; in this case, you can think of a Pod as a wrapper around a single container; Kubernetes manages Pods rather than managing the containers directly.
+A Kubernetes cluster has two main components—the control plane and data plane, machines used as compute resources.
+The control plane hosts the components used to manage the Kubernetes cluster.
+Worker nodes can be virtual machines (VMs) or physical machines. A node hosts pods, which run one or more containers.
+What is pod and node in Kubernetes?
+Pods are simply the smallest unit of execution in Kubernetes, consisting of one or more containers, each with one or more application and its binaries. Nodes are the physical servers or VMs that comprise a Kubernetes Cluster.
+Here's how you can look at these logs.
+Default Logs. kubectl logs podname -n namespace. The above kubectl command shows you the logs of the pod in the specified namespace. ...
+Specific Container Logs. kubectl logs podname -n namespace -c container_name. ...
+All Containers. Kubectl logs podname -n namespace –all-containers=true.
+How do I view logs in Kubernetes?
+Procedure. If you run kubectl logs pod_name , a list of containers in the pod is displayed.
+You can use one of the container names to get the logs for that specific container.
+Deleting resources from file
+Because the pods are managed by the deployment, deleting the deployment also deletes the pods.
+How many containers can be launched in a node?
+No more than 110 pods per node.
+No more than 5000 nodes.
+No more than 150000 total pods.
+No more than 300000 total containers.
+Pods are the smallest, most basic deployable objects in Kubernetes. A Pod represents a single instance of a running process in your cluster. Pods contain one or more containers, such as Docker containers. When a Pod runs multiple containers, the containers are managed as a single entity and share the Pod's resources.
+You can delete PVCs in using the kubectl delete command or from the F5 Console. To delete using kubectl, specify the PVC either by file or by name.
+How do I list volumes in Kubernetes?
+You can get the volumes mounted on the pod using the output of kubectl describe pod which has the Mounts section in each container's spec . You can then exec into the pod using kubectl exec and the cd to the directory you want to write data to.M
+Do containers have IP addresses?
+By default, the container is assigned an IP address for every Docker network it connects to. The IP address is assigned from the pool assigned to the network, so the Docker daemon effectively acts as a DHCP server for each container. Each network also has a default subnet mask and gateway.
+How do you restart a pod?
+The pod to be replaced can be retrieved using the kubectl get pod to get the YAML statement of the currently running pod
+and pass it to the kubectl replace command with the --force flag specified in order to achieve a restart.
+This is useful if there is no YAML file available and the pod is started.
+How do I delete a pod?
+Pods can be deleted simply using the kubectl delete pod command. However, the challenge is usually to maintain application uptime and avoid service disruption. To do this, you can use the kubectl drain command to gracefully bring pods up on another node before they are deleted
+/var/log directory
+For Kubernetes cluster components that run in pods, these write to files inside the /var/log directory, bypassing the default logging mechanism (the components do not write to the systemd journal). You can use Kubernetes' storage mechanisms to map persistent storage into the container that runs the component.
+How do I check CPU and memory in Kubernetes?
+Go to pod's exec mode kubectl exec -it pod_name -n namespace -- /bin/bash.
+Run cat /sys/fs/cgroup/cpu/cpuacct.usage for cpu usage.
+Run cat /sys/fs/cgroup/memory/memory.usage_in_bytes for memory usage.
+Where are Kubernetes events stored?
+In a default Kubernetes setup, the events are persisted into etcd, a key-value store
+What happens if pod exceeds memory limit?
+If the Container continues to consume memory beyond its limit, the Container is terminated. If a terminated Container can be restarted, the kubelet restarts it, as with any other type of runtime failure
+What happens when a pod is restarted?
+When a container is out of memory, or OOM, it is restarted by its pod according to the restart policy. The default restart policy will eventually back off on restarting the pod if it restarts many times in a short time span.
+How do I rollback changes in Kubernetes?
+After the kubectl apply command you can check if the deployment rolled out successfully or not and then, if necessary, the kubectl rollout undo command can rollback to the previous revision. Also, you can use the sleep Linux command to wait some time before that.
+After the rolling update, the previous ReplicaSet is not deleted — not immediately at least.
+Instead, it is kept around with a replicas count of 0.
+If you try to execute another rolling update from version 2 to version 3, you might notice that at the end of the upgrade, you have two ReplicaSets with a count of 0.
+Why are the previous ReplicaSets not deleted or garbage collected?
+Imagine that the current version of the container introduces a regression.
+You probably don't want to serve unhealthy responses to your users, so you might want to roll back to a previous version of your app.
+If you still have an old ReplicaSet, perhaps you could scale the current replicas to zero and increment the previous ReplicaSet count.
+In other words, keeping the previous ReplicaSets around is a convenient mechanism to roll back to a previously working version of your app.
+By default Kubernetes stores the last 10 ReplicaSets and lets you roll back to any of them.
+But you can change how many ReplicaSets should be retained by changing the spec.revisionHistoryLimit in your Deployment.
+
+
+
+
+                              wht protocol to connect k8s wid hybrid environment
+                              aws setup n hybrid svrs -- to connect to k8s machine...how will u set that up
+
+application types worked on, in k8s
+
+deployment.yaml to deploy couple of containers, wht procedure happens at backend
+
+purpose of etcd, api svr
+
+basic things to consider before setting up k8s cluster
+
+wht is stateful set n y we need to opt for it
+y do we prefer stateful set?
+
+how to pass secrets to app...how to set that up in k8s, vry native to k8s
+how to create n manage a secret in k8s
+
+how will u set a pod wid root access in root mode in k8s?
+
+
+
+
+=================
+jenkins questions
+=================
+
+write groovy
+function pass var while calling another fn
+other function should print/annotation that variable
+
+syntax to run parallel stage
+
+thrs bunch of tasks in a pipeline, in QA area, lot of test cases running...svr gets vry slow, 8-node svr
+jenkins cluster is getting hung wen pipeline is executed...how will u troubleshoot y pipeline is choking svr?
+
+
+======
+python
+======
+small function in python to reverse a string, no function just plain method
+
+=====
+linux
+=====
+fs mounted, stays busy...how do i chk wht is consuming my fs to keep it busy..wht files r accessed...how to check wht files r accessed?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+k8s questions asked
+======================================
+
+wht r components of k8s
+can u define objects related to persistent storage? Whats the benefit?
+what is pv, pvc, storage class...wht is difference ? y we use these components?
+
+pv -- persistent volume -- we cant mount storage directly from NFS, we need some abstraction/plugins
+    pv gets tht backend storage
+pvc -- persistent volume claim...thru pvc, u can claim tht object
+
+pv static good for static content
+dynamic good best, no need to define lot of details needed in pv static
+
+how do u get storage like nfs, nas or ebs, wht object u use, what is the abstraction?
+storageclass -- CSI
+
+schedule a pod on a particular node
+  3 nodes, schedule ur pod on 1 of those particular node.
+
+node selector -- can b defined in pod to specify needed port on the nodes
+    there are some circumstances where you may want to control which node the Pod deploys to,
+    for example, to ensure that a Pod ends up on a node with an SSD attached to it,
+    or to co-locate Pods from two different services that communicate a lot into the same availability zone
+
+You can use any of the following methods to choose where Kubernetes schedules specific Pods:
+
+nodeSelector field matching against node labels
+Affinity and anti-affinity
+nodeName field
+Pod topology spread constraints
+
+nodeSelector
+  nodeSelector is the simplest recommended form of node selection constraint.
+  You can add the nodeSelector field to your Pod specification and specify the node labels you want the target node to have.
+  Kubernetes only schedules the Pod onto nodes that have each of the labels you specify.
+
+
+kubelet -- kubectl -- overall arch of k8s -- how components interact wid each other
+
+kubelet or kubectl -- if anything goes bad on node, how does node interact wid controller,
+                      wht component of node is responsible for interacting wid controller or api-svr or central components
+
+When the node becomes unreachable, The master sets the node to NotReady state. The master waits for pod-eviction-timeout before taking any action. The pod-eviction-timeout is configurable parameter is set to 5 minutes by default as part of the kube-controller-manager bootup process
+Kubernetes will automatically evict the pod on the failed node and then try to recreate a new one with old volumes. If the node is back online within 5 – 6 minutes of the failure, Kubernetes will restart pods, unmount, and re-mount volumes.
+The scheduler finds feasible Nodes for a Pod and then runs a set of functions to score the feasible Nodes and picks a Node with the highest score among the feasible ones to run the Pod. The scheduler then notifies the API server about this decision in a process called binding.
+The manager node dispatches units of work called tasks to worker nodes. It's also responsible for all orchestration and container management tasks like maintaining cluster state and service scheduling. Worker nodes receive and execute tasks.
+
+Kubelet Service
+This communicates with the master component to receive commands and work. The kubelet process then assumes responsibility for maintaining the state of work and the node server.
+
+Pods on a node can communicate with all pods on all nodes without NAT. Agents on a node (system daemons, kubelet) can communicate with all the pods on that specific node.
+
+There are two primary communication paths from the control plane (the API server) to the nodes. The first is from the API server to the kubelet process which runs on each node in the cluster. The second is from the API server to any node, pod, or service through the API server's proxy functionality.
+
+kube-controller-manager
+
+The Kubernetes controller manager is a control loop that monitors and regulates the state of a Kubernetes cluster. It receives information about the current state of the cluster and objects within it, and sends instructions to move the cluster towards the cluster operator's desired state.
+
+When a leader fails, the etcd cluster automatically elects a new leader. The election does not happen instantly once the leader fails. It takes about an election timeout to elect a new leader since the failure detection model is timeout based
+
+You can also use kubectl describe nodes nodename and check Non-terminated Pods section to view which pods are currently running in that particular node.
+
+The node controller is responsible for updating Node objects when new servers are created in your cloud infrastructure. The node controller obtains information about the hosts running inside your tenancy with the cloud provider.
+
+
+A control plane serves as a nerve center of each Kubernetes cluster. It includes components that can control your cluster, its state data, and its configuration. The Kubernetes control plane is responsible for ensuring that the Kubernetes cluster attains a desired state, defined by the user in a declarative manner.
+
+
+
+kube-controller-manager
+kube-controller-manager – responsible for node management (detecting if a node fails), pod replication, and endpoint creation.
+
+
+Every Kubernetes Node runs at least: Kubelet, a process responsible for communication between the Kubernetes control plane and the Node; it manages the Pods and the containers running on a machine.
+
+kubelet. An agent that runs on each node in the cluster. It makes sure that containers are running in a Pod. The kubelet takes a set of PodSpecs that are provided through various mechanisms and ensures that the containers described in those PodSpecs are running and healthy
+
+
+Can Kubernetes work without master node?
+Yes, they will work in their last state.
+
+Each individual non-master node on the cluster runs two processes: kubelet– this is to communicate with Master. kube-proxy– this is nothing but network proxy (Kubernetes networking services) on each node
+
+Can we have 2 master nodes in Kubernetes?
+Creating and operating a highly available Kubernetes cluster requires multiple Kubernetes control plane nodes along with their Master Nodes. To achieve this, each Master Node must be able to communicate with every other Master, and be addressable by a single IP address.
+
+Can two containers running in a same pod ping each other?
+Containers on same pod act as if they are on the same machine. You can ping them using localhost:port itself. Every container in a pod shares the same IP. You can `ping localhost` inside a pod
+
+The Container Runtime Interface (CRI) is the main protocol for the communication between the kubelet and Container Runtime. The Kubernetes Container Runtime Interface (CRI) defines the main gRPC protocol for the communication between the cluster components kubelet and container runtime.
+
+How does Kubernetes decide which node to use?
+The scheduler finds feasible Nodes for a Pod and then runs a set of functions to score the feasible Nodes and picks a Node with the highest score among the feasible ones to run the Pod. The scheduler then notifies the API server about this decision in a process called binding
+
+estio svc mesh
+
+helm templates for deployments
+
+cidr blocks -- aws --
+
+launch config n launch template
+
+However, defining a launch template instead of a launch configuration allows you to have multiple versions of a launch template. With versioning of launch templates, you can create a subset of the full set of parameters. Then, you can reuse it to create other versions of the same launch template.
+
+HA in k8s or auto scaling at application end
+https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/

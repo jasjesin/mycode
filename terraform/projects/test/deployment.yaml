@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: webapp-pod
+    namespace: default
+spec:
+  containers:
+    - image: nginx
+      imagePullPolicy: Always
+      name: webapp
+      envFrom:
+        - secretRef:
+            name: db secret

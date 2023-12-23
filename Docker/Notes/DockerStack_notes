@@ -1,0 +1,101 @@
+Docker Run     --> creates/starts 1 container at a time
+Docker Compose --> creates/updates multiple containers, volumes, networks etc. in 1-shot on SINGLE NODE
+Docker Swarm   --> Docker's orchestration & scheduling tool, starts 1 service at a time
+Docker Stack   --> sits 1 lvl higher than containers, used in Docker Swarm, to trigger
+                   multiple containers/svcs in 1-shot on MULTIPLE NODES.
+
+Docker Stack works with docker-compose
+
+vim docker-compose.yaml
+================================
+version: '3.7'
+services:
+  nginx_alpine:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./app:/usr/share/nginx/html
+  nginx_latest:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/usr/share/nginx/html
+================================
+
+jasdil@Jasdils-Air docker_compose % docker stack deploy --compose-file docker-compose.yaml newstack
+Creating network newstack_default
+Creating service newstack_nginx_alpine
+Creating service newstack_nginx_latest
+
+jasdil@Jasdils-Air docker_compose % docker service ls
+ID             NAME                    MODE         REPLICAS   IMAGE          PORTS
+kckyynkdi1r9   newstack_nginx_alpine   replicated   1/1        nginx:alpine   *:8000->80/tcp
+hdo18nrs0gc9   newstack_nginx_latest   replicated   1/1        nginx:latest   *:8080->80/tcp
+
+jasdil@Jasdils-Air docker_compose % docker service ps newstack_nginx_alpine
+ID             NAME                      IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+jioqb5gs84o4   newstack_nginx_alpine.1   nginx:alpine   docker-desktop   Running         Running 28 seconds ago
+
+jasdil@Jasdils-Air docker_compose % docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+88d27f390fe3   nginx:latest   "/docker-entrypoint.…"   38 seconds ago   Up 37 seconds   80/tcp    newstack_nginx_latest.1.43rv6f1up5gno2wzpd3ffmwxr
+fe172552476b   nginx:alpine   "/docker-entrypoint.…"   39 seconds ago   Up 38 seconds   80/tcp    newstack_nginx_alpine.1.jioqb5gs84o42v120z8a4ytxd
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker exec -it 88d27f390fe3 /bin/bash
+root@88d27f390fe3:/# curl http://10.0.1.2:80
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Docker Compose Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+</head>
+<body>
+
+    <h1>This is a Docker Compose Demo Page.</h1>
+    <p>This content is being served by an Nginx container.</p>
+
+</body>
+</html>
+root@88d27f390fe3:/#
+
+jasdil@Jasdils-Air docker_compose % docker stack ps newstack #<-- gives STACK ID
+ID             NAME                      IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+jioqb5gs84o4   newstack_nginx_alpine.1   nginx:alpine   docker-desktop   Running         Running 13 minutes ago
+43rv6f1up5gn   newstack_nginx_latest.1   nginx:latest   docker-desktop   Running         Running 13 minutes ago
+
+jasdil@Jasdils-Air docker_compose % docker stack services newstack #<-- gives SERVICE ID
+ID             NAME                    MODE         REPLICAS   IMAGE          PORTS
+kckyynkdi1r9   newstack_nginx_alpine   replicated   1/1        nginx:alpine   *:8000->80/tcp
+hdo18nrs0gc9   newstack_nginx_latest   replicated   1/1        nginx:latest   *:8080->80/tcp
+
+jasdil@Jasdils-Air docker_compose % docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+88d27f390fe3   nginx:latest   "/docker-entrypoint.…"   38 seconds ago   Up 37 seconds   80/tcp    newstack_nginx_latest.1.43rv6f1up5gno2wzpd3ffmwxr
+fe172552476b   nginx:alpine   "/docker-entrypoint.…"   39 seconds ago   Up 38 seconds   80/tcp    newstack_nginx_alpine.1.jioqb5gs84o42v120z8a4ytxd
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker stack rm newstack
+Removing service newstack_nginx_alpine
+Removing service newstack_nginx_latest
+Removing network newstack_default
+
+jasdil@Jasdils-Air docker_compose % docker stack ps newstack
+nothing found in stack: newstack
+
+jasdil@Jasdils-Air docker_compose % docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+
+
++++++++++++++++++++++++++++++++++
+Sat - Docker cmds, Compose, Swarm, Stacks
+Sunday - K8s
+Monday - Jenkins wid Ansible
+Tuesday - Jenkins wid Terraform
+Wednesday - Jenkins wid Docker
+Thursday - Jenkins wid K8s
++++++++++++++++++++++++++++++++++

@@ -1,0 +1,905 @@
+[] Mock1 Tutorial:
+set auto completion:
+  search cheat sheet in k8s documentation, copy paste below cmds>>
+    source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+    echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+    alias k=kubectl
+    complete -o default -F __start_kubectl k
+
+# use --help if not sure abt options for setting up labels
+k run --help | grep labels
+k expose --help
+kubectl run static-busybox --image=busybox --command -- sleep 1000 --dry-run=client -o yaml > /etc/kubernetes/manifests/static-buxbox.yaml
+
+# orange app issue >>
+# CrashLoopBackOff -- issue wid pod or process running inside pod is crashing,
+# If thrs Init:CrashLoopBackOff (Init prefixed), tht means issue InitContainer
+k logs orange init-myservice
+sh: sleeeep: not found
+
+$ kubectl apply -f deploy.yaml --record
+$ kubectl rollout history deployment nginx-deploy
+$ kubectl set image deployment/nginx-deploy nginx=nginx:1.17 --record
+$ kubectl rollout history deployment nginx-deploy
+
+
+
+# for nodeport expose....we cant specify nodePort in cmd,
+# so, create it n then edit svc
+
+# No imperative cmd for PV, copy-paste template frm documentation n make changes
+
+[] Mock1:
+kubectl run nginx-pod --image=nginx:alpine
+kubectl run messaging --image=redis:alpine --labels "tier=msg"
+kubectl create ns apx-x9984574
+kubectl get no -o json > /opt/outputs/nodes-z3444kd9.json
+kubectl expose pod messaging --port=6379 --name=messaging-service
+kubectl create deploy hr-web-app --image=kodekloud/webapp-color --replicas=2
+kubectl run static-busybox --image=busybox --command sleep 1000 --dry-run=client -o yaml > /etc/kubernetes/manifests/static-busybox.yaml
+kubectl run temp-bus --image=redis:alpine -n finance
+-- kubectl replace --force -f /tmp/kubectl-edit-551781990.yaml
+kubectl expose deployment.apps/hr-web-app --type=NodePort --port=8080 --name=hr-web-app-service; kubectl edit svc hr-web-app-service # update NodePort
+kubectl get no -o=jsonpath="{.items[*].status.nodeInfo.osImage}" > /opt/outputs/nodes_os_x43kj56.txt
+
+[] Mock2 Tutorial:
+set auto completion:
+  search cheat sheet in k8s documentation, copy paste below cmds>>
+    source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+    echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+    alias k=kubectl
+    complete -o default -F __start_kubectl k
+
+search etcdctl backup on k8s documentation, on right side, click on backuping up etcd cluster
+ETCDCTL_API=3 etcdtctl snapshot save -h             # use help to see wht all is needed
+cat /etc/kubernetes/manifests/etcd.yaml | grep file # to look for values
+# also look for endpoints
+ETCTL_API=3 etcdctl snapshot save /opt/etcd-backup.db \
+--endpoints=https://127.0.0.1:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key
+
+# for emptyDir one, 1st create pod wid imperative cmd
+# then look for pod volume in k8s documentation, click on emptyDir on right
+# add volumes n volumeMount sections right under spec
+# do a describe to make sure volume mount is created
+
+# context one, look for help 1st to see if
+# context can b added in imperative cmd
+k run --help | grep -i context # not thr, so create pod yaml 1st
+# search for capabilities in k8s doc
+# click on right for set capabilities for container
+# copy paste snippet securityContext.capabilities.add for SYS_TIME
+
+# for mounting a pv using pvc in use-pv.yaml, create pvc 1st
+# search for pvc in k8s doc, copy paste n make changes, create pvc
+# then look for claims as volumes in k8s doc, copy paste snippet n make changes
+# create pod n do describe on pod
+
+
+# rolling update, do help on kubectl set image one
+kubectl set image --help
+kubectl set image <deployName> <containerName>=<imageVersion>
+
+# create user RBAC one
+ls /root/CKA/ # csr n key exists here, as per question
+# 1st create a csr n get tht approved to hv user created
+# then create a role wid privileges n then role binding
+# search for rolebinding in k8s doc, on left click on csr request
+# copy template n make changes, copy cmd to encode wid base64
+cat john.csr | base64 | tr -d "\n"
+# create csr
+k get csr
+k certificate approve john.csr # this creates user
+k get csr # chk CONDITION is updated to Approved
+k create role --help # to see if all remnts can b added using imperative cmd
+# copy paste cmd n make changes
+k create role developer --verb=create,update,get,delete,list --resource=pods -n development
+k get role -n development
+k describe role -n development
+# now verify 1st before creating rolebinding
+k auth --help
+k auth can-i --help
+k auth can-i get pod -n development --as john # should b no
+k create rolebinding --help # copy paste cmd n make changes
+k create rolebinding john-developer --role=developer --user=john -n development
+k get rolebinding -n development
+k describe rolebinding -n development
+k auth can-i get pods -n development --as john # should b yes
+k auth can-i watch pods -n development --as john # should b no
+
+# nginx-resolver
+k expose pod nginx-resolver --name=nginx-resolver-svc --port=80
+k describe svc nginx-resolver-svc
+k run busybox --image=busybox:1.28 -- sleep 4000 # so tht it keeps running in bkgrnd
+k get pods
+k exec busybox -- nslookup nginx-resolver-svc # should resolve frm this pod as internal svc
+k exec busybox -- nslookup nginx-resolver-svc > /root/CKA/nginx.svc
+# to resolve pod name, search for DNS in k8s doc, go to pods,
+# pod resolution is <podIPinDashes>.ns.pod.cluster.local
+k get po -o wide # fetch IP n use it wid dashes instead of . (dots)
+k exec busybox -- nslookup 10-50-192-4.default.pod.cluster.local # gives output
+k exec busybox -- nslookup 10-50-192-4.default.pod.cluster.local > /root/CKA/nginx.pod
+
+# static pod on node01, create file frm master n scp
+k run --help # look for restart policy
+k run nginx-critical --image=nginx --restart=Always --dry-run=client -o yaml
+# copy paste above output in node01 under /etc/kubernetes/manifests/ as nginx-critical.yaml
+k get po # frm master node, should b able to see new pod on node01
+
+[] Mock2:
+controlplane ~ ➜  cat pv-analytics.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-analytics
+spec:
+  capacity:
+    storage: 100Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany:
+  persistentVolumeReclaimPolicy: Retain
+
+  controlplane ~ ✖ cat /root/CKA/use-pv.yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: null
+    labels:
+      run: use-pv
+    name: use-pv
+  spec:
+    containers:
+    - image: nginx
+      name: use-pv
+      resources: {}
+    dnsPolicy: ClusterFirst
+    restartPolicy: Always
+  status: {}
+
+
+
+
+ETCTL_API=3 etcdctl snapshot save /opt/etcd-backup.db --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key
+controlplane ~ ➜  cat redis.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: redis-storage
+  name: redis-storage
+spec:
+  containers:
+  - image: redis:alpine
+    name: redis-storage
+    volumeMounts:
+      - name: vol01
+        mountPath: /data/redis
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: vol01
+    emptyDr: {}
+status: {}
+
+controlplane ~ ➜
+
+controlplane ~ ➜  cat pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: super-user-pod
+  name: super-user-pod
+spec:
+  containers:
+  - command:
+    - sleep
+    - "4800"
+    image: busybox:1.28
+    name: super-user-pod
+    securityContext:
+      capabilities:
+        add: ["system_time"]
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+controlplane ~ ➜
+
+controlplane ~ ➜  cat /root/CKA/use-pv.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: use-pv
+  name: use-pv
+spec:
+  containers:
+  - image: nginx
+    name: use-pv
+    volumeMounts:
+    - mountPath: /data
+      name: pv-1
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+  - name: pv-1
+    persistentVolumeClaim:
+      claimName: pv-1-claim
+status: {}
+
+controlplane ~ ➜  cat pv-1-claim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-1-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+
+kubectl set image deployment/nginx-deploy nginx=nginx:1.17
+Create a nginx pod called nginx-resolver using image nginx, expose it internally with a service called nginx-resolver-service. Test that you are able to look up the service and pod names from within the cluster. Use the image: busybox:1.28 for dns lookup. Record results in /root/CKA/nginx.svc and /root/CKA/nginx.pod
+Pod: nginx-resolver created
+Service DNS Resolution recorded correctly
+Pod DNS resolution recorded correctly
+
+
+Create a new user called john. Grant him access to the cluster. John should have permission to create, list, get, update and delete pods in the development namespace . The private key exists in the location: /root/CKA/john.key and csr at /root/CKA/john.csr.
+Important Note: As of kubernetes 1.19, the CertificateSigningRequest object expects a signerName.
+Please refer the documentation to see an example. The documentation tab is available at the top right of terminal.
+CSR: john-developer Status:Approved
+Role Name: developer, namespace: development, Resource: Pods
+Access: User 'john' has appropriate permissions
+
+
+controlplane ~ ✖ kubectl run nginx-critical --image=nginx --dry-run=client -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nginx-critical
+  name: nginx-critical
+spec:
+  containers:
+  - image: nginx
+    name: nginx-critical
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+controlplane ~ ➜  kubectl run nginx-critical --image=nginx --dry-run=client -o yaml > nginx-critical.yaml
+
+controlplane ~ ➜  scp -pr nginx-critical.yaml node01:/etc/kubernetes/manifests/
+nginx-critical.yaml                 100%  259   347.4KB/s   00:00
+
+controlplane ~ ➜
+
+
+
+Create user CSR
+openssl genrsa -out user1.key 2048
+openssl req -new -key user1.key -out user1.csr
+
+Approve CSR
+openssl x509 -req -in user1.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out user1.crt -days 500
+
+Create Role or ClusterRole
+cat role.yml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1 34
+metadata:
+namespace: test-namespace
+name: user1-role
+rules:
+- apiGroups: ["", “extensions”, “apps”]
+resources: [“deployments”, “pods”, “services”]
+verbs: [“get”, “list”, “watch”, “create”, “update”, “patch”, “delete”]
+
+Create RoleBindings
+cat binding.yml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1 34
+metadata:
+name: user1-rolebinding
+namespace: test-namespace
+subjects:
+
+kind: User
+name: user1
+apiGroup: “”
+roleRef:
+kind: Role
+name: user1-role
+apiGroup: “”
+Use it
+kubectl config set-credentials user1 --client-certificate=/root/user1.crt --client-key=user1.key
+
+kubectl config set-context user1-context --cluster=kubernetes --namespace=test-namespace --user=user1
+
+
+[] Mock3 Tutorial:
+k api-resources | grep persistent
+persistentvolumes # <== its plural, wen in doubt verify this way
+
+kubectl create clusterrole pvviewer-role --verb=list --resource=persistentvolumes
+
+# wen u use --help, try to pick copy-paste from usage:
+# use serviceaccount in ns:sa format, as thats different than user
+# u can use tab for options/arguments during imperative cmd
+k create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --serviceaccount=default:pvviewer
+
+# use tab to see if sa option is avl or not
+k run pvviewer --image=redis --serviceaccount=pvviewer
+
+
+# jsonpath
+k get no -o json | jq # <== jq coes color-coding for better readability
+k get no -o json | jq -c 'paths' # <== lists all the paths to each field
+k get no -o json | jq -c 'paths' | grep -i internalip
+# better to do standard grep
+k get no -o json | grep -B2 -A2 -i internalip
+
+# identify  the path to retieve data
+# the following gives arrays wid index no.s n path
+k get no -o json | jq -c 'paths' | grep type | grep -v metadata
+
+# strt forming query, based on path
+k get no -o jsonpath='{.items[*].status}'
+k get no -o jsonpath='{.items[*].status.addresses[*]}'
+k get no -o jsonpath='{.items[*].status.addresses[*].address}'
+k get no -o jsonpath='{.items[*].status.addresses[?@type=="InternalIP"].address}'
+k get no -o=jsonpath='{.items[*].status.addresses[?@type=='InternalIP'].address}'
+
+# multi-pod
+# srch for env variables in k8s doc, n add
+
+# kubeconfig issue
+# test issue 1st by executing below to see issue
+kubectl get nodes --kubeconfig /var/root/CKA/super.kubeconfig
+# chk port for controlplane for kubeconfig file, n set to 6443
+
+
+# replicas issue, wid ctrller mgr
+update manifest file @ 5 different places
+
+
+
+[] Mock3:
+Create a new service account with the name pvviewer. Grant this Service account access to list all PersistentVolumes in the cluster by creating an appropriate cluster role called pvviewer-role and ClusterRoleBinding called pvviewer-role-binding.
+Next, create a pod called pvviewer with the image: redis and serviceAccount: pvviewer in the default namespace.
+
+controlplane ~ ➜  kubectl create sa pvviewer
+serviceaccount/pvviewer created
+
+controlplane ~ ➜  source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+
+controlplane ~ ➜  echo "source <(kubectl completion bash)" >> ~/.bashrc
+
+controlplane ~ ➜  alias k=kubectl
+
+controlplane ~ ➜  complete -o default -F __start_kubectl k
+controlplane ~ ➜  kubectl create clusterrole pvviewer-role --verb=list --resource=persistentvolume
+clusterrole.rbac.authorization.k8s.io/pvviewer-role created
+controlplane ~ ✖ k create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --user=pvviewer
+clusterrolebinding.rbac.authorization.k8s.io/pvviewer-role-binding created
+controlplane ~ ✖ k run pvviewer --image=redis --dry-run=client -o yaml > pvviewer.yaml
+controlplane ~ ➜  k create -f pvviewer.yaml
+pod/pvviewer created
+
+List the InternalIP of all nodes of the cluster. Save the result to a file /root/CKA/node_ips.
+kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}' > /root/CKA/node_ips
+
+Use the command kubectl scale to increase the replica count to 3.
+kubectl scale deploy nginx-deploy --replicas=3
+The controller-manager is responsible for scaling up pods of a replicaset. If you inspect the control plane components in the kube-system namespace, you will see that the controller-manager is not running.
+
+kubectl get pods -n kube-system
+The command running inside the controller-manager pod is incorrect.
+After fix all the values in the file and wait for controller-manager pod to restart.
+Alternatively, you can run sed command to change all values at once:
+
+sed -i 's/kube-contro1ler-manager/kube-controller-manager/g' /etc/kubernetes/manifests/kube-controller-manager.yaml
+This will fix the issues in controller-manager yaml file.
+At last, inspect the deployment by using below command:
+kubectl get deploy
+
+===========================================================
+
+Re-practising all tests:
+
+=======================================
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+=======================================
+
+
+k get po --no-headers | wc -l
+k get po --watch
+
+# replicaset
+# verify apiVersion
+# verify label & selector matches
+# change in rs image does NOT trigger re-creation of pods.
+# need to manually delete existing pods, for new pods to be created to pick change
+# Deployment takes care of this without any manual intervention
+# svc invocation --> svcName.<ns>.svc.cluster.local
+
+# to manually schedule pod on a node, use spec.container.nodeName
+# to filter based on labels/selectors
+k get po --selector env=dev --no-headers | wc -l
+k get all --selector env=prod --no-headers | wc -l
+k get po --selector env=prod,bu=finance,tier=frontend --no-headers
+
+# How to remove a taint
+controlplane ~ ✖ k describe no controlplane | grep -i taint
+Taints:             node-role.kubernetes.io/control-plane:NoSchedule
+
+controlplane ~ ✖ k taint no controlplane key=node-role.kubernetes.io/control-plane:NoSchedule-
+error: invalid taint spec: key=node-role.kubernetes.io/control-plane:NoSchedule, a valid label must be an empty string or consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyValue',  or 'my_value',  or '12345', regex used for validation is '(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?')
+See 'kubectl taint -h' for help and examples
+
+controlplane ~ ✖ k taint no controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+node/controlplane untainted
+
+# how to apply label >>
+controlplane ~ ➜  k label no node01 color=blue
+node/node01 labeled
+
+# /var/lib/kubelet/config.yaml to chk for static pod on node01
+# spec.schedulerName to specify particular scheduler
+
+controlplane ~ ➜  k create cm webapp-config-map --from-literal=APP_COLOR=darkblue
+configmap/webapp-config-map created
+
+# wen u need to invoke entire cm file instead of specific key >>
+containers:
+- envFrom:
+  - configMapRef:
+      name: webapp-config-map
+
+# same way wen u need all secrets stored in a file
+envFrom:
+- secretRef:
+    name: mysecret
+
+
+controlplane ~ ➜  k create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+secret/db-secret created
+
+controlplane ~ ➜  k drain node01 --ignore-daemonsets
+node/node01 already cordoned
+Warning: ignoring DaemonSet-managed Pods: kube-flannel/kube-flannel-ds-gbkm4, kube-system/kube-proxy-vrc6r
+evicting pod default/blue-987f68cb5-m2sd4
+evicting pod default/blue-987f68cb5-fvcgw
+pod/blue-987f68cb5-fvcgw evicted
+pod/blue-987f68cb5-m2sd4 evicted
+node/node01 drained
+
+controlplane ~ ✖ ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+>      --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key \
+>      snapshot save /opt/snapshot-pre-boot.db
+Snapshot saved at /opt/snapshot-pre-boot.db
+
+controlplane ~ ➜  ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt      --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key      snapshot restore /opt/snapshot-pre-boot.db --data-dir /var/lib/etcd-data-new
+2023-02-04 00:22:43.525723 I | mvcc: restore compact to 807
+2023-02-04 00:22:43.532435 I | etcdserver/membership: added member 8e9e05c52164694d [http://localhost:2380] to cluster cdf818194e3a8c32
+
+# shows how many nodes present in cluster, in this case just 1 (count non-loopback addresses)
+etcd-server ~ ➜  ETCDCTL_API=3 etcdctl \
+>  --endpoints=https://127.0.0.1:2379 \
+>  --cacert=/etc/etcd/pki/ca.pem \
+>  --cert=/etc/etcd/pki/etcd.pem \
+>  --key=/etc/etcd/pki/etcd-key.pem \
+>   member list
+b2e33fdcd7f6ed8c, started, etcd-server, https://10.10.25.15:2380, https://10.10.25.15:2379, false
+
+# for external etcd
+vi /etc/systemd/system/etcd.service
+
+# reload n restart external etcd
+systemctl daemon-reload systemctl restart etcd
+
+=======================================
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+=======================================
+
+k config view                       # to view clusters
+kubectl config use-context cluster1 # to switch clusters
+
+# for custom kubeconfig to be used
+controlplane ~ ➜  k config --kubeconfig=my-kube-config use-context research
+Switched to context "research".
+
+controlplane ~ ➜  k config --kubeconfig=my-kube-config current-context
+research
+
+
+
+# Find CN in cert
+controlplane ~ ➜  openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout | grep CN
+        Issuer: CN = kubernetes
+        Subject: CN = kube-apiserver
+
+# useful wen kubectl stops working
+crictl ps -a
+
+
+
+
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: akshay
+spec:
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1ZqQ0NBVDRDQVFBd0VURVBNQTBHQTFVRUF3d0dZV3R6YUdGNU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRgpBQU9DQVE4QU1JSUJDZ0tDQVFFQXV0TlFTREJXbE5FRllRTm91dWpHSU80T0x5eXZWYmpSZWFCejV4eGphaWRiCkRZVmkvaEtzQTBVTi95SmxKU3lQRGMzOHBCaFhBRHl0LzN4VFdxdmg4VEJ3T0ZIVmtUZFpPUnhWR3VRK0l5RmoKUVRVYkpyZkRmMnpEVzdQVkNBZm5Kb0RTMXlhc1FJRnhlRVlRZ09uMW4yNUNtQ0F4MEJ5RDNGc1poTWdIT1ovKwovODVRWGxUR1VLeGRaSSsrRHQ5OTBsSnJ1US8zWUlIdEgyS1QvRjZ6d3FOREZUbFBNZzN4UkMrSUdyV3BJQzhoCnpSSGxhQi9mZU8wcUJLUlF5NXQzZWp0clp2Lzl6MnllaXd2NnVlRU5OdWRRWE1lUm1nZGVPci9hemJiSXpuZmcKNUJXc1lqelhoOEMxWlN6THBBTE5vcTBXTHMwdWZjNTVMMmlrdEQyYmh3SURBUUFCb0FBd0RRWUpLb1pJaHZjTgpBUUVMQlFBRGdnRUJBRHVUMDVzUTgvZmVwSW0yNHRwTzl1RjRFdlpiRThVbmRDY24rN240LzBKYWh0WUlhOVQzClk5Si9kcndLUFZsVjJsNDk1MUdoSlRMVXJaWDdOVzY2czkyRnVuMEgrU1BJdUdIWHdKTHRKMW92MFhzb0hUWlEKUk82VFcwVUdUY2NRY3J1b2MxanRZMHYybUhTcmgrVkU5MTcvdFZxOTJXem4vZmRGUHVlRUF2aUlDWWJTaktmKwp1NnF2MzBmVWdSSzJ4cHErdVRWY29vVmpkYlNWSkJxR0dwWTE3VlpiT0d3bXcwREo3VFNIc2NBeU1EcjRXU3BzCjZwS2xlR0ROb1NTcGRMdW5sOThBUHhsVjJLNjNrSFdIUURpbUJUTnBiQ3VGa1I3M0U4bFpoQXFTS2ZLV0RxWnUKMU1UdkFmUHVmRThpVUV1c1BnNHRaOHhOU2txT1FvY05QS1E9Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: 86400  # one day
+  usages:
+  - client auth
+EOF
+
+controlplane ~ ➜  k certificate approve akshay
+certificatesigningrequest.certificates.k8s.io/akshay approved
+
+=======================================
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+=======================================
+
+
+controlplane ~ ➜  k auth can-i get po --as dev-user
+no
+controlplane ~ ✖ k create role developer --verb=list,create,delete --resource=pods
+role.rbac.authorization.k8s.io/developer created
+controlplane ~ ➜  k describe role developer
+Name:         developer
+Labels:       <none>
+Annotations:  <none>
+PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  pods       []                 []              [list create delete]
+controlplane ~ ➜  k create rolebinding dev-user-binding --role=developer --user=dev-user
+rolebinding.rbac.authorization.k8s.io/dev-user-binding created
+controlplane ~ ➜  k describe rolebindings.rbac.authorization.k8s.io dev-user-binding
+Name:         dev-user-binding
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  Role
+  Name:  developer
+Subjects:
+  Kind  Name      Namespace
+  ----  ----      ---------
+  User  dev-user
+controlplane ~ ✖ k auth can-i get deploy --as dev-user -n blue
+yes
+controlplane ~ ➜  k create clusterrole node-admin --resource=nodes --verb=create,list,get,watch,delete
+clusterrole.rbac.authorization.k8s.io/node-admin created
+controlplane ~ ✖ k create clusterrolebinding michelle-binding --clusterrole=node-admin --user=michelle
+clusterrolebinding.rbac.authorization.k8s.io/michelle-binding created
+controlplane ~ ➜  k describe clusterrole node-admin
+Name:         node-admin
+Labels:       <none>
+Annotations:  <none>
+PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  nodes      []                 []              [create list get watch delete]
+controlplane ~ ➜  k describe clusterrolebindings.rbac.authorization.k8s.io michelle-binding
+Name:         michelle-binding
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  ClusterRole
+  Name:  node-admin
+Subjects:
+  Kind  Name      Namespace
+  ----  ----      ---------
+  User  michelle
+controlplane ~ ➜  k auth can-i get no --as michelle
+Warning: resource 'nodes' is not namespace scoped
+yes
+controlplane ~ ✖ k create clusterrole storage-admin --resource=persistentvolumes,storageclasses --verb=create,list,get,watch,delete
+clusterrole.rbac.authorization.k8s.io/storage-admin created
+controlplane ~ ➜  k create clusterrolebinding michelle-storage-admin --clusterrole=storage-admin --user=michelle
+clusterrolebinding.rbac.authorization.k8s.io/michelle-storage-admin created
+controlplane ~ ➜  k auth can-i get pv --as michelle
+Warning: resource 'persistentvolumes' is not namespace scoped
+yes
+
+
+k create token dashboard-sa
+
+Usage:
+  kubectl create secret docker-registry NAME --docker-username=user --docker-password=password --docker-email=email [--docker-server=string] [--from-file=[key=]source] [--dry-run=server|client|none] [options]
+
+root@controlplane ~ ➜  k create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
+secret/private-reg-cred created
+
+# Add the following to pull all secrets defined, to be pulled for login
+spec:
+  containers:
+  imagePullSecrets:
+  - name: private-reg-cred
+
+controlplane ~ ➜  k exec -it pod/ubuntu-sleeper -- ps -eaf | grep sleep
+1010           1       0  0 08:48 ?        00:00:00 sleep 4800
+
+# to find n/w interface for cluster connectivity on, use its internal IP address to search
+controlplane ~ ➜  ip a | grep 10.41.136.9
+    inet 10.41.136.9/24 brd 10.41.136.255 scope global eth0
+
+# to find MAC address, use interface attached to internal IP of node
+controlplane ~ ➜  ip link show eth0
+13788: eth0@if13789: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default
+    link/ether 02:42:0a:29:88:09 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+
+
+Task # 7
+controlplane ~ ✖ ip link  | grep -i docker
+controlplane ~ ✖ ip link  | grep -i containerd
+
+root@node01 ~ ➜  ip link  | grep -i containerd
+root@node01 ~ ✖ ip link  | grep -i docker
+
+
+# status of interface
+controlplane ~ ➜  ip link show cni0
+3: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether 7a:2c:95:1a:cb:98 brd ff:ff:ff:ff:ff:ff
+
+# to ping google from the controlplane node, which route does it take?
+controlplane ~ ➜  ip route show default
+default via 172.25.1.1 dev eth1
+
+# What is the port the kube-scheduler is listening on in the controlplane node?
+controlplane ~ ✖ netstat -ntlp | grep sched
+tcp        0      0 127.0.0.1:10259         0.0.0.0:*               LISTEN      2627/kube-scheduler
+                              <port>                                            <process>
+# Notice that ETCD is listening on two ports. Which of these have more client connections established?
+controlplane ~ ➜  netstat -anp | grep etcd | grep 2379 | wc -l
+67
+
+=======================================
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+=======================================
+
+# default path configured with all binaries of CNI supported plugins?
+/opt/cni/bin/
+
+# What binary executable file run by kubelet after a container and its associated namespace are created?
+controlplane ~ ✖ ls -ltrh /etc/cni/net.d/
+-rw-r--r-- 1 root root 292 Feb  4 20:28 10-flannel.conflist
+
+# Identify name of bridge network/interface created by weave on each node.
+ip link
+
+# What is the POD IP address range configured by weave?
+controlplane ~ ✖ k describe daemonset.apps/weave-net -n kube-system  | grep -i range
+      IPALLOC_RANGE:   10.244.0.0/16
+controlplane ~ ➜  ip addr show weave
+4: weave: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1376 qdisc noqueue state UP group default qlen 1000
+    link/ether ba:ba:fb:eb:ec:24 brd ff:ff:ff:ff:ff:ff
+    inet 10.244.0.1/16 brd 10.244.255.255 scope global weave
+       valid_lft forever preferred_lft forever
+
+# What is the default gateway configured on the PODs scheduled on node01?
+root@node01 ~ ✖ ip route | grep weave
+10.244.0.0/16 dev weave proto kernel scope link src 10.244.192.0
+
+# What network range are the nodes in the cluster part of?
+controlplane ~ ✖ ip addr | grep eth0
+425: eth0@if426: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue state UP group default
+    inet 10.5.218.6/24 brd 10.5.218.255 scope global eth0
+
+# What is the range of IP addresses configured for PODs on this cluster?
+controlplane ~ ➜  k describe po -n kube-system weave-net-plnhn | grep -i range
+      IPALLOC_RANGE:   10.244.0.0/16
+
+# What is the IP Range configured for the services within the cluster?
+controlplane ~ ➜  cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep cluster-ip-range
+    - --service-cluster-ip-range=10.96.0.0/12
+
+# What type of proxy is the kube-proxy configured to use?
+controlplane ~ ➜  k logs kube-proxy-djmdc -n kube-system I0205 01:12:16.401725       1 node.go:163] Successfully retrieved node IP: 10.5.218.6
+I0205 01:12:16.401786       1 server_others.go:109] "Detected node IP" address="10.5.218.6"
+I0205 01:12:16.401806       1 server_others.go:535] "Using iptables proxy"
+
+# How does K8s cluster ensure kube-proxy pod runs on all nodes in the cluster?
+controlplane ~ ➜  k logs kube-proxy-djmdc -n kube-system I0205 01:12:16.401725       1 node.go:163] Successfully retrieved node IP: 10.5.218.6
+I0205 01:12:16.401786       1 server_others.go:109] "Detected node IP" address="10.5.218.6"
+I0205 01:12:16.401806       1 server_others.go:535] "Using iptables proxy"
+
+# How is the Corefile passed into the CoreDNS POD?
+controlplane ~ ➜  k get po -n kube-system coredns-787d4945fb-x2cm5 -o yaml | grep -i -B3 corefile
+  containers:
+  - args:
+    - -conf
+    - /etc/coredns/Corefile
+--
+  - configMap:
+      defaultMode: 420
+      items:
+      - key: Corefile
+        path: Corefile
+
+controlplane ~ ➜  k get cm -A | grep core
+kube-system       coredns                              1      9m56s
+
+# What is the root domain/zone configured for this kubernetes cluster?
+controlplane ~ ➜  k describe cm -n kube-system coredns
+Name:         coredns
+Namespace:    kube-system
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+Corefile:
+----
+.:53 {
+    errors
+    health {
+       lameduck 5s
+    }
+    ready
+    kubernetes cluster.local in-addr.arpa ip6.arpa {
+
+# What name can be used to access the hr web server from the test Application?
+controlplane ~ ➜  k exec -ti hr -- curl http://test-service
+
+
+=======================================
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+=======================================
+
+# Which namespace is the Ingress Resource deployed in?
+controlplane ~ ➜  k get ingress -A
+NAMESPACE   NAME                 CLASS    HOSTS   ADDRESS         PORTS   AGE
+app-space   ingress-wear-watch   <none>   *       10.102.112.53   80      5m26s
+
+
+# Initialize Control Plane Node (Master Node). Use the following options:
+# apiserver-advertise-address - Use the IP address allocated to eth0 on the controlplane node
+# apiserver-cert-extra-sans - Set it to controlplane
+# pod-network-cidr - Set to 10.244.0.0/16
+
+controlplane ~ ➜  ifconfig eth0
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1450
+        inet 10.10.85.3  netmask 255.255.255.0  broadcast 10.10.85.255
+        ether 02:42:0a:0a:55:03  txqueuelen 0  (Ethernet)
+        RX packets 7233  bytes 819800 (819.8 KB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 6174  bytes 2052444 (2.0 MB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+kubeadm init --apiserver-cert-extra-sans=controlplane --apiserver-advertise-address 10.10.85.3 --pod-network-cidr=10.244.0.0/16
+
+# Once done, set up the default kubeconfig file and wait for node to be part of the cluster.
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# Install a Network Plugin. As a default, we will go with flannel
+# y this didnt work? kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.20.2/Documentation/kube-flannel.yml
+
+kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.users[*].name}" > /opt/outputs/users.txt
+kubectl config view --kubeconfig=my-kube-config -o=jsonpath='{users[*].name}'
+
+
+# A set of Persistent Volumes are available.
+# Sort them based on their capacity
+controlplane ~ ➜  k get pv --sort-by=.spec.capacity.storage > /opt/outputs/storage-capacity-sorted.txt
+
+k get pv --sort-by=.spec.capacity.storage -o=custom-columns=NAME:.metadata.name,CAPACITY:.spec.capacity.storage > /opt/outputs/pv-and-capacity-sorted.txt
+
+# Use a JSON PATH query to identify the context configured for the aws-user in the my-kube-config context file
+controlplane ~ ➜  k config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.context.user=='aws-user')].name}" > /opt/outputs/aws-context-name
+
+
+==========================================
+source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+==========================================
+
+# certs fail to load, if cert paths r correct
+# chk hostPath under volumes to mak sure cert path is mounted properly
+
+# remote node down
+journalctl -u kubelet
+ssh node01 "service kubelet status" # chk kubelet status remotely
+ssh node01 "service kubelet start"
+ssh node01 "service kubelet restart" # vry imp to restart remotely
+
+# inspect remote node kubelet logs >>
+journalctl -u kubelet -f # vry imp to chk logs remotely!
+# Feb 05 01:55:22 controlplane kubelet[3745]: E0205 01:55:22.604673    3745 pod_workers.go:965] "Error syncing pod, skipping" err="failed to \"CreatePodSandbox\" for \"coredns-787d4945fb-lsz9d_kube-system(e3306026-bd3b-47f3-aca3-53a93dd2edb2)\" with CreatePodSandboxError: \"Failed to create sandbox for pod \\\"coredns-787d4945fb-lsz9d_kube-system(e3306026-bd3b-47f3-aca3-53a93dd2edb2)\\\": rpc error: code = Unknown desc = failed to setup network for sandbox \\\"2ad496b059e08451615b96a811d4ea87019417f4437cb822d42ab17c91e9443b\\\": plugin type=\\\"flannel\\\" failed (add): open /run/flannel/subnet.env: no such file or directory\"" pod="kube-system/coredns-787d4945fb-lsz9d" podUID=e3306026-bd3b-47f3-aca3-53a93dd2edb2
+# fix path of cert at /var/lib/kubelet/config.yaml on node01
+
+# kube-proxy --> daemonset -- remember ALWAYS!!!!
+
+[] Lightning Lab:
+
+
+apt-mark unhold kubelet kubectl && \
+apt-get update && apt-get install -y kubelet=1.26.0-00 kubectl=1.26.0-00 && \
+apt-mark hold kubelet kubectl
+
+apt-mark unhold kubeadm && \
+apt-get update && apt-get install -y kubeadm=1.26.0-00 && \
+apt-mark hold kubeadm
+
+controlplane ~ ➜  k get deployments.apps -n admin2406 -o=custom-columns=DEPLOYMENT:.metadata.name,CONTAINER_IMAGE:.spec.template.spec.containers[*].image,READY_REPLICAS:.spec.replicas,NAMESPACE:.metadata.namespace --sort-by=.metadata.name > /opt/admin2406_data
+
+
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 \
+  --cacert=<trusted-ca-file> --cert=<cert-file> --key=<key-file> \
+  snapshot save /opt/etcd-backup.db
+
+ETCDCTL_API=3 etcdctl snapshot save /tmp/etcd-backup.db \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key
+
+  controlplane ~ ✖ k get no -o=jsonpath="{.items[*].status.addresses[?(@.type=='InternalIP')].address}"
+  10.1.18.9 10.1.18.11
+
+
+jzsingh
+RwwioLa*K25leWyKn{3f
+
+SyyjpMb*L36mfXzLo{4g
+
+
+M1h*R0c{k8s
+
+
+
+
+
+
+
+
+
+
+
+.

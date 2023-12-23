@@ -1,0 +1,778 @@
+[] URL to refer: https://medium.com/bb-tutorials-and-thoughts/250-practice-questions-for-the-dca-exam-84f3b9e8f5ce
+
+
+[] Types of n/w: (These n/ws r automatically created wid swarm)
+1. overlay networks: manage communications among the Docker daemons participating in the swarm.You can attach a service to one or more existing overlay networks as well, to enable service-to-service communication.
+1a. ingress network: is a special overlay network that facilitates load balancing among a service’s nodes. When any swarm node receives a request on a published port, it hands that request off to a module called IPVS. IPVS keeps track of all the IP addresses participating in that service, selects one of them, and routes the request to it, over the ingress network.
+2. docker_gwbridge: is a bridge network that connects the overlay networks (including the ingress network) to an individual Docker daemon’s physical network.
+
+Customize the ingress network involves removing and creating a new one and you need to do that before you create any services in the swarm.
+
+[] Volume Drivers:
+When building fault-tolerant applications, you might need to configure multiple replicas of the same service to have access to the same files.
+Volume drivers allow you to abstract the underlying storage system from the application logic. For example, if your services use a volume with an NFS driver, you can update the services to use a different driver, as an example to store data in the cloud, without changing the application logic.
+
+[] Types of svc deployment:
+1. global: runs exactly one task on every node
+2. replicated: runs several identical tasks on nodes
+
+[] general flow when troubleshooting services or clusters:
+docker service ls
+docker service ps <service>
+docker service inspect <service>
+docker inspect <task>
+docker inspect <container>
+docker logs <container>
+
+[] Quorom in Raft Consensus Algo:
+Quorum ensures that cluster state stays consistent in the presence of failures by requiring a majority of nodes to agree on values.
+Raft tolerates up to (N-1)/2 failures and requires a majority or quorum of (N/2)+1 members to agree on values proposed to the cluster.
+without Quorum, swarm wont be able to serve the requests.
+Maintain an odd number of managers in the swarm to support manager node failures.
+
+[] If the swarm loses the quorum of
+1. managers, it loses the ability to perform management tasks.
+2. All the existing tasks will continue to run. But, new nodes cannot be added and new tasks can't be created.
+
+[] Why Fixed IP Address for Swarm?
+We should use a fixed IP address for the advertise address to prevent the swarm from becoming unstable on machine reboot
+If the whole swarm restarts and every manager node subsequently gets a new IP address,
+  there is no way for any node to contact an existing manager.
+Therefore the swarm is hung while nodes try to contact one another at their old IP addresses.
+
+[] rejoin a manager node in the cluster?
+1. To demote the node to a worker, run docker node demote <NODE>
+2. To remove the node from the swarm, run docker node rm <NODE>
+3. Re-join the node to the swarm with a fresh state using docker swarm jo
+
+[] Dockerfile instructions :
+FROM sets the base image for the subsequent builds in the Dokcerfile
+ARG is the only instruction can precede FROM
+RUN instruction will execute any commands in a new layer on top of the current image and commit the results.
+ADD or --no-cache can invalidate/avoid the cache from previous builds.
+If CMD instruction provides default arguments for the ENTRYPOINT instruction, both should be specified in JSON format
+CMD provides defaults for an executing container. These defaults can include an executable, or they can omit the executable, in which case you must specify an ENTRYPOINT instruction as well.
+Use ENTRYPOINT in combination with CMD, to make your container execute the same executable every time
+LABEL adds metadata to image (docker inspect <image>, look for Labels section to see list of labels defined for image)
+EXPOSE serves as a type of documentation between the image publisher and image consumer
+ENV sets enviroment value to the key and it is available for the subsequent build steps and in the running container as well.
+    ENV <key> <value>
+ENTRYPOINT allows you to configure a container that will run as an executable. Command line arguments to docker run <image> will be appended after all elements in an exec form ENTRYPOINT, and will override all elements specified using CMD.
+VOLUME creates a mount point with specified name and marks it as holding externally mounted volumes from native host or other containers.
+USER sets the user name (or UID) and optionally group (or GID) to use when running the image and for any RUN, CMD and ENTRYPOINT instructions that follow it in the Dockerfile.
+WORKDIR sets working directory for any RUN, CMD, ENTRYPOINT, COPY and ADD instructions that follow it in the Dockerfile.
+ARG defines a variable that users can pass at build-time to the builder with the docker build command using the --build-arg <varname>=<value> flag.
+    ARG <name>[=<default value>]
+ONBUILD adds to the image a trigger instruction to be executed at a later time, when the image is used as the base for another build.
+STOPSIGNAL signal sets the system call signal that will be sent to the container to exit
+HEALTHCHECK lets Docker daemon know the health of the container
+SHELL allows default shell used for shell form of commands to be overridden. Default shell on Linux is ["/bin/sh", "-c"], and on Windows is ["cmd", "/S", "/C"]. SHELL instruction must be written in JSON form in a Dockerfile.
+
+
+[] Difference b/w COPY n ADD:
+COPY takes in a source and destination. It only lets you copy in a local or directory from your host (the machine-building the Docker image) into the Docker image itself.
+ADD  does that same but in addition, it also supports 2 other sources.
+1. A URL instead of a local file/directory.
+2. Extract tar from the source directory into the destination.
+Read for more details: https://www.geeksforgeeks.org/difference-between-the-copy-and-add-commands-in-a-dockerfile/
+
+[] Forms of usage:
+RUN:
+  1. shell form: RUN <command>
+  2. exec form: RUN ["executable", "param1", "param2"]
+CMD:
+  1. CMD ["executable","param1","param2"] (exec form, this is the preferred form)
+  2. CMD ["param1","param2"] (as default parameters to ENTRYPOINT)
+  3. CMD command param1 param2 (shell form)
+
+[] Notes:
+.dockerignore file helps exclude some files while executing the docker build image and don’t want to send all the files to Docker daemon
+Multi Stage Builds is best way to drastically reduce the size of an image?
+Each layer in image, is only a set of differences from the layer before it. The layers are stacked on top of each other.
+When you create a container It adds one writable layer on top of all the layers of the image
+Images, containers, volumes, or customized configuration files on your host are not automatically removed when you uninstall docker
+
+[] minimize the number of layers while building the image:
+Only the instructions RUN, COPY, ADD create layers.
+Where possible, use multi-stage builds, and only copy the artifacts you need into the final image.
+sort multi line arguments
+RUN apt-get update && apt-get install -y \
+  bzr \
+  cvs \
+  git \
+  mercurial \
+  subversion
+
+[] How to leverage the build cache?
+Put instructions that likely to change often at the bottom of the dockerfile.
+
+[] Copy on Write (CoW) Strategy:
+strategy of sharing and copying files for maximum efficiency.
+If a file or directory exists in a lower layer within the image,
+  and another layer (including the writable layer) needs read access to it,
+  it just uses the existing file.
+The first time another layer needs to modify the file (when building the image or running the container),
+  the file is copied into that layer and modified.
+This minimizes I/O and the size of each of the subsequent layers.
+
+[] ways to install docker, using:
+1. repositories
+2. DEB package
+3. convience scripts
+
+[] How to configure a registry:
+The Registry configuration is based on a YAML file.
+you can specify a configuration variable from the environment by passing -e arguments
+to your docker run stanza or from within a Dockerfile using the ENV instruction.
+Default location of registry config file >> /etc/docker/registry/config.yml
+# for example you have a configuration like this for root directory
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+# you can create environment variable like this
+REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/somewhere
+it will change from /var/lib/registry to /somewhere
+
+[] Ephemeral containers:
+These differ from other containers in that they lack guarantees for resources or execution, and they will never be automatically restarted, so they are not appropriate for building applications.
+The image defined by your Dockerfile should generate containers that are as ephemeral as possible.
+By “ephemeral”, we mean that the container can be stopped and destroyed, then rebuilt and replaced with an absolute minimum set up and configuration.
+
+[] UCP clusters:
+Universal Control Plane is a containerized application that runs on Docker Enterprise Edition, extending its functionality to simplify the deployment, configuration, and monitoring of your applications at scale.
+Once Universal Control Plane (UCP) instance is deployed, developers and IT operations no longer interact with Docker Engine directly, but interact with UCP instead. Since UCP exposes the standard Docker API, this is all done transparently, so that you can use the tools you already know and love, like the Docker CLI client and Docker Compose
+Docker Universal Control Plane (UCP) is the enterprise-grade cluster management solution from Docker. You install it on-premises or in your virtual private cloud, and it helps you manage your Docker cluster and applications through a single interface.
+best practice to use client bundle to troubleshoot UCP clusters.
+A client bundle contains a private and public key pair that authorizes your requests in UCP. It also contains utility scripts you can use to configure your Docker and kubectl client tools to talk to your UCP deployment.
+Read more abt it at https://dockerlabs.collabnix.com/advanced/Docker-UCP-overview.html#:~:text=Docker%20Universal%20Control%20Plane%20(UCP,applications%20through%20a%20single%20interface.
+
+[] Recommended way of installing Docker:
+set up docker repositories
+install from them for the ease of installation and upgrade tasks.
+
+[] Release channels that Docker CE supports:
+1. Stable gives you latest releases for general availability.
+2. Test gives pre-releases that are ready for testing before general availability.
+3. Nightly gives you latest builds of work in progress for the next major release.
+
+[] logging drivers:
+Docker has multiple mechanisms to get the logging information from running docker containers and services.
+These mechanisms are called logging drivers. Default logging driver is json-file
+Available logging drivers for the Docker CE edition: json-file, local, journald
+
+[] Command Options:
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+jasdil@Jasdils-Air k8s % docker swarm --help
+
+Usage:  docker swarm COMMAND
+Manage Swarm
+Commands:
+  ca          Display and rotate the root CA
+  init        Initialize a swarm
+  join        Join a swarm as a node and/or manager
+  join-token  Manage join tokens
+  leave       Leave the swarm
+  unlock      Unlock swarm
+  unlock-key  Manage the unlock key
+  update      Update the swarm
+Run 'docker swarm COMMAND --help' for more information on a command.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+jasdil@Jasdils-Air docker_compose % docker service --help
+Usage:  docker service COMMAND
+Manage services
+Commands:
+  create      Create a new service
+  inspect     Display detailed information on one or more services
+  logs        Fetch the logs of a service or task
+  ls          List services
+  ps          List the tasks of one or more services
+  rm          Remove one or more services
+  rollback    Revert changes to a service's configuration
+  scale       Scale one or multiple replicated services
+  update      Update a service
+Run 'docker service COMMAND --help' for more information on a command.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# co-related svcs r called Stack
+# A stack is a group of interrelated services that share dependencies, and can be orchestrated and scaled together.
+
+jasdil@Jasdils-Air k8s % docker stack --help
+
+Usage:  docker stack [OPTIONS] COMMAND
+Manage Docker stacks
+Options:
+      --orchestrator string   Orchestrator to use (swarm|kubernetes|all)
+Commands:
+  deploy      Deploy a new stack or update an existing stack
+  ls          List stacks
+  ps          List the tasks in the stack
+  rm          Remove one or more stacks
+  services    List the services in the stack
+Run 'docker stack COMMAND --help' for more information on a command.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+[] Commands wid description:
+docker swarm init --advertise-addr <IP> #<-- assigns this IP to mgr n broadcasts to all tht mgr is avl at this IP
+# This flag configures the IP address for the manager node and The other nodes in the swarm must be able to access
+# the manager at the IP address.
+
+docker info #<-- informs current status of swarm under swarm section
+docker node ls #<-- gives info abt nodes
+docker swarm join-token manager #<-- generates needed token, use it to join
+docker swarm join-token worker  #<-- generates needed token, use it to join
+docker run <imageName> #<-- runs container
+
+docker swarm init --autolock #<-- enables autolock during startup of new mgr node
+docker swarm unlock #<-- asks for key to unlock
+docker update <mgrID> --autolock=true  #<-- enables  auto-lock on running container n generates key
+docker update <mgrID> --autolock=false #<-- disables auto-lock on running container, asks for key
+docker swarm unlock-key #<-- view current unlock key, asks for key
+docker swarm unlock-key --rotate #<-- rotate unlock key, asks for key
+# When Docker restarts, both the TLS key used to encrypt communication among swarm nodes, and
+# the key used to encrypt and decrypt Raft logs on disk, are loaded into each manager node’s memory.
+# Docker 1.13 introduces the ability to protect the mutual TLS encryption key and the key used to encrypt and decrypt
+# Raft logs at rest, by allowing you to take ownership of these keys and to require manual unlocking of your managers.
+# This feature is called autolock.
+# If the key was rotated after one of the manager nodes became unavailable and if you don’t have access to the previous key,
+# you may need to force the manager to leave the swarm and join it back as a new manager.
+
+docker service create --name=<svcName> -p 80:8080 --replicas 5 <image> #<-- creates new svc wid 5 replicas
+docker service ls #<-- displays list of svcs
+docker service ps <svcName> #<-- displays list of tasks of a svc
+docker svc inspect <svcID>  #<-- shows details abt svc in JSON-format
+docker svc inspect <svcID> --pretty #<-- shows limted details abt svc
+docker node ls #<-- shows which nodes r are part of swarm cluster
+
+docker stack services <svcName> --filter name=<searchString> #<-- filters output
+docker stack services <svcName> --format "{{.ID}}: {{.Name}}: {{.Mode}}" #<-- formats output to specified format
+
+docker service scale <svcName>=2 #<-- scales specified svc
+docker service update --replicas=3 webserver #<-- another way to scale a svc
+docker service update --image=<imageName>:<version> <svcName> #<-- performs staggered/rolling deployment of nodes 1,2,3
+docker service rollback <svcName> #<-- reverts last change to svc config, in reverse order of nodes 3,2,1
+# attach a volume during svc creation -->
+docker service create --name=<svcName> -p <src>:<tgt> --replicas <count> --mount type=volume,source=<folder>,destination=<folder> <image>
+# create a svc wid volume driver -->
+docker service create -d \
+  --name nfs-service \
+  --mount 'type=volume,source=nfsvolume,target=/app,volume-driver=local,volume-opt=type=nfs,volume-opt=device=:/var/docker-nfs,volume-opt=o=addr=10.0.0.10' \
+  nginx:latest
+
+docker network ls #<-- shows list of n/w alrdy setup
+docker network create --driver overlay test-network #<-- creates a new overlay n/w
+docker network create --driver overlay --subnet=<CIDR> --gateway=<IP> <nwName> #<-- creates new custom n/w
+# create new custom ingress n/w -->
+docker network create --driver overlay --ingress --subnet=<CIDR> --gateway=<IP> --opt com.docker.network.mtu-1200 <nwName>
+docker network inspect <networkID> #<-- shows details abt n/w n can chk wht svcs r attached to this n/w
+docker service create --replicas 2 --name <svcName> --network <nwName> <image> #<-- attaches new svc to specific n/w
+
+# cmd to create a volume wid a driver -->
+docker volume create --driver vieux/sshfs \
+  -o sshcmd=test@node2:/home/test \
+  -o password=testpassword \
+  sshvolume
+
+# labels help update metadata abt a node
+docker node update --label-add foo --label-add bar worker1   #<-- add multiple labels
+docker node update --label-rm foo worker1 #<-- remove label
+
+# --placement-pref --> sets up the svc to divide tasks evenly over different categories of nodes
+# example: if we have three datacenters 3 replicas will be placed on each datacenter
+docker service create \
+  --replicas 9 \
+  --name redis_2 \
+  --placement-pref 'spread=node.labels.datacenter' \
+  redis:3.0.6
+
+# --constraint --> limit svc on particular nodes
+# example: the following limits tasks for the redis service to nodes where the node type label equals queue
+docker service create \
+  --name redis_2 \
+  --constraint 'node.labels.type == queue' \
+  redis:3.0.6
+
+# supported flags for creating services with templates?
+# --env
+# --mount
+# --hostname
+# example
+  service create --name hosttempl \
+      --hostname="{{.Node.Hostname}}-{{.Node.ID}}-{{.Service.Name}}"\
+        busybox top
+
+# --no-cache helps avoid using cache from previous builds
+docker build --no-cache . #<-- creates new image by picking dockerfile frm current path, n avoids cache frm previous build
+
+docker run --env <key>=<value> #<-- change environment variables when running containers
+docker run --entrypoint #<-- overrides ENTRYPOINT defined in Dockerfile
+docker run -v #<-- initializes newly created Volume
+
+WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN pwd
+# result: /a/b/c
+
+WORKDIR /a
+WORKDIR /b
+WORKDIR c
+RUN pwd
+# result: /b/c
+
+# options that can be provided for the HEALTHCHECK instruction -->
+# --interval=DURATION (default: 30s)
+# --timeout=DURATION (default: 30s)
+# --start-period=DURATION (default: 0s)
+# --retries=N (default: 3)
+
+docker image prune #<-- removes unused images
+docker image prune -a #<-- removes all unused images
+docker image prune -a --filter "until=24h" #<-- limit the scope when pruning images
+docker image history <image> #<-- shows list of actions done using this image in the past
+docker rmi <image> #<-- removes image
+docker rmi --no-prune <image> #<-- removes image without deleting untagged parent images
+docker tag <image>:<tag> <newName>:<tag|newTag> #<-- creates an alias / symmlink to original image
+docker pull <image> #<-- pulls image frm docker hub to local repo
+docker pull <image> <newName>:<tag> localhost:5000:/tmp/ #<-- pulls n tags image
+docker pull --all-tags nginx #<-- pull an image with multiple images
+docker push <image> #<-- pushes image to dockerhub
+docker push <image>:<tag> --disable-content-trust=true #<-- disable Image signing while pushing an image to the repository
+export DOCKER_CONTENT_TRUST=1; docker push <dtr-domain>/<repository>/<image>:<tag> #<-- enable docker content trust
+docker image inspect #<-- under Layers section, shows layers of docker image
+docker image load -i file.tar #<-- loads file frm archive n creates image
+
+docker inspect --format='{{range .NetworkSettings.Networks}}{{.MacAddress}}{{end}}' <containerID>
+docker inspect --format='{{.LogPath}}' <containerID> #<-- provides just logpath, helps avoid scanning entire details
+
+docker run -d -p 5000:5000 --restart=always --name registry registry:2 #<-- runs local registry
+docker container stop registry && docker container rm -v registry #<-- stops n removes local registry
+
+# customize published port
+docker run -d \
+  -p 5001:5000 \
+  --name registry-test \
+  registry:2
+
+# change the port the registry listens on, within the container
+docker run -d \
+  -e REGISTRY_HTTP_ADDR=0.0.0.0:5001 \
+  -p 5001:5001 \
+  --name registry-test \
+  registry:2
+
+# storage customization
+docker run -d \
+  -p 5000:5000 \
+  --restart=always \
+  --name registry \
+  -v /mnt/registry:/var/lib/registry \
+  registry:2
+
+# customize entire cfg file of registry
+docker run -d -p 5000:5000 --restart=always --name registry \
+             -v `pwd`/config.yml:/etc/docker/registry/config.yml \
+             registry:2
+
+docker login localhost:5000 #<-- login to self-hosted
+
+# configure any credential helpers or credentials for the registry to prevent passing every time you log in
+vi /etc/docker/daemon.json
+
+docker search nginx --limit=2 #<-- limit the number of records when docker search
+docker search --format "{{.Name}}: {{.StarCount}}" nginx #<-- format output of docker search
+
+sudo apt-get purge docker-ce; sudo rm -rf /var/lib/docker #<-- uninstalls docker
+sudo usermod -aG docker <userID> #<-- add user to Docker group and use docker as a non-root user
+docker info --format '{{.LoggingDriver}}' #<-- find the logging driver for Docker daemon
+docker run -it --log-driver json-file --log-opt max-size=10m alpine ash #<-- configure a logging driver for a container
+docker node update --availability drain <NODE> #<-- drains a node for maintenance
+
+# configure a logging driver for the Docker daemon so that all the containers use it
+vim /etc/docker/daemon.json
+{
+  "log-driver": "syslog"
+}
+
+# configurable options for logging driver
+use log-opts in the daemon.json file
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3",
+    "labels": "production_status",
+    "env": "os,customer"
+  }
+}
+
+
+
+
+
+
+
+
+docker ps -a
+
+
+
+Practiced Executions:
+jasdil@Jasdils-Air k8s % docker service ls
+ID        NAME      MODE      REPLICAS   IMAGE     PORTS
+
+jasdil@Jasdils-Air k8s % docker service create --name=webserver --replicas 3 -p 80:8080 nginx:alpine
+iep0t22om7opdxhhbrxzgu4ae
+overall progress: 3 out of 3 tasks
+1/3: running   [==================================================>]
+2/3: running   [==================================================>]
+3/3: running   [==================================================>]
+verify: Service converged
+
+jasdil@Jasdils-Air k8s % docker service ls
+ID             NAME        MODE         REPLICAS   IMAGE          PORTS
+iep0t22om7op   webserver   replicated   3/3        nginx:alpine   *:80->8080/tcp
+
+jasdil@Jasdils-Air k8s % docker service ps webserver
+ID             NAME          IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+km12davhdwhr   webserver.1   nginx:alpine   docker-desktop   Running         Running 16 seconds ago
+vryhaohhtqwl   webserver.2   nginx:alpine   docker-desktop   Running         Running 16 seconds ago
+3g50kp4gh09e   webserver.3   nginx:alpine   docker-desktop   Running         Running 16 seconds ago
+
+jasdil@Jasdils-Air k8s % docker service ps webserver -o wide
+unknown shorthand flag: 'o' in -o
+See 'docker service ps --help'.
+
+jasdil@Jasdils-Air k8s % docker node ls
+ID                            HOSTNAME         STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+z4odl0mcn9qj90m214hw0hxem *   docker-desktop   Ready     Active         Leader           20.10.21
+
+jasdil@Jasdils-Air k8s % docker node ps docker-desktop
+ID             NAME          IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+km12davhdwhr   webserver.1   nginx:alpine   docker-desktop   Running         Running 56 seconds ago
+vryhaohhtqwl   webserver.2   nginx:alpine   docker-desktop   Running         Running 56 seconds ago
+3g50kp4gh09e   webserver.3   nginx:alpine   docker-desktop   Running         Running 56 seconds ago
+jasdil@Jasdils-Air k8s %
+
+jasdil@Jasdils-Air docker_compose % cat docker-compose.yaml
+version: '3.7'
+services:
+  nginx_alpine:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./app:/usr/share/nginx/html
+  nginx_latest:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/usr/share/nginx/html
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker stack deploy -c /Users/jasdil/Documents/Learnings/Docker/docker_compose/docker-compose.yaml nginx
+Creating network nginx_default
+Creating service nginx_nginx_alpine
+Creating service nginx_nginx_latest
+
+jasdil@Jasdils-Air docker_compose % docker stack ls
+NAME      SERVICES   ORCHESTRATOR
+nginx     2          Swarm
+
+jasdil@Jasdils-Air docker_compose % docker stack services
+"docker stack services" requires exactly 1 argument.
+See 'docker stack services --help'.
+Usage:  docker stack services [OPTIONS] STACK
+List the services in the stack
+
+jasdil@Jasdils-Air docker_compose % docker stack services nginx
+ID             NAME                 MODE         REPLICAS   IMAGE          PORTS
+v0zlroc6kdhl   nginx_nginx_alpine   replicated   1/1        nginx:alpine   *:8000->80/tcp
+9o053w44msk6   nginx_nginx_latest   replicated   1/1        nginx:latest   *:8080->80/tcp
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker stack ps nginx --filter "name=nginx"
+ID             NAME                   IMAGE          NODE             DESIRED STATE   CURRENT STATE           ERROR     PORTS
+szu7yc97s7o7   nginx_nginx_alpine.1   nginx:alpine   docker-desktop   Running         Running 4 minutes ago
+cc3zhn0wx1y8   nginx_nginx_latest.1   nginx:latest   docker-desktop   Running         Running 4 minutes ago
+
+jasdil@Jasdils-Air docker_compose % docker stack ps nginx --filter "ID=szu"
+ID             NAME                   IMAGE          NODE             DESIRED STATE   CURRENT STATE           ERROR     PORTS
+szu7yc97s7o7   nginx_nginx_alpine.1   nginx:alpine   docker-desktop   Running         Running 5 minutes ago
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker stack services nginx --filter "ID=9o0"
+ID             NAME                 MODE         REPLICAS   IMAGE          PORTS
+9o053w44msk6   nginx_nginx_latest   replicated   1/1        nginx:latest   *:8080->80/tcp
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker stack services nginx --format "{{.ID}}: {{.Name}}: {{.Mode}}"
+
+v0zlroc6kdhl: nginx_nginx_alpine: replicated
+9o053w44msk6: nginx_nginx_latest: replicated
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker service ls
+ID             NAME                 MODE         REPLICAS   IMAGE          PORTS
+v0zlroc6kdhl   nginx_nginx_alpine   replicated   1/1        nginx:alpine   *:8000->80/tcp
+9o053w44msk6   nginx_nginx_latest   replicated   1/1        nginx:latest   *:8080->80/tcp
+iep0t22om7op   webserver            replicated   3/3        nginx:alpine   *:80->8080/tcp
+
+jasdil@Jasdils-Air docker_compose % docker service scale nginx_nginx_alpine=2
+nginx_nginx_alpine scaled to 2
+overall progress: 2 out of 2 tasks
+1/2: running   [==================================================>]
+2/2: running   [==================================================>]
+verify: Service converged
+
+jasdil@Jasdils-Air docker_compose % docker service ls
+ID             NAME                 MODE         REPLICAS   IMAGE          PORTS
+v0zlroc6kdhl   nginx_nginx_alpine   replicated   2/2        nginx:alpine   *:8000->80/tcp
+9o053w44msk6   nginx_nginx_latest   replicated   1/1        nginx:latest   *:8080->80/tcp
+iep0t22om7op   webserver            replicated   3/3        nginx:alpine   *:80->8080/tcp
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker stack ls
+NAME      SERVICES   ORCHESTRATOR
+nginx     2          Swarm
+
+jasdil@Jasdils-Air docker_compose % docker stack ps nginx
+ID             NAME                   IMAGE          NODE             DESIRED STATE   CURRENT STATE                ERROR     PORTS
+szu7yc97s7o7   nginx_nginx_alpine.1   nginx:alpine   docker-desktop   Running         Running 12 minutes ago
+kt4r4dhk2jjc   nginx_nginx_alpine.2   nginx:alpine   docker-desktop   Running         Running about a minute ago
+cc3zhn0wx1y8   nginx_nginx_latest.1   nginx:latest   docker-desktop   Running         Running 12 minutes ago
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker service update --replicas=3 webserver
+webserver
+overall progress: 3 out of 3 tasks
+1/3: running   [==================================================>]
+2/3: running   [==================================================>]
+3/3: running   [==================================================>]
+verify: Service converged
+
+jasdil@Jasdils-Air docker_compose % docker service ps webserver
+ID             NAME          IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+km12davhdwhr   webserver.1   nginx:alpine   docker-desktop   Running         Running 22 minutes ago
+vryhaohhtqwl   webserver.2   nginx:alpine   docker-desktop   Running         Running 22 minutes ago
+3g50kp4gh09e   webserver.3   nginx:alpine   docker-desktop   Running         Running 22 minutes ago
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker service update --image=nginx:latest webserver
+webserver
+overall progress: 3 out of 3 tasks
+1/3: running   [==================================================>]
+2/3: running   [==================================================>]
+3/3: running   [==================================================>]
+verify: Service converged
+
+jasdil@Jasdils-Air docker_compose % docker service ps webserver
+ID             NAME              IMAGE          NODE             DESIRED STATE   CURRENT STATE             ERROR     PORTS
+tf25c55jy60e   webserver.1       nginx:latest   docker-desktop   Running         Running 15 seconds ago
+km12davhdwhr    \_ webserver.1   nginx:alpine   docker-desktop   Shutdown        Shutdown 15 seconds ago
+5w5i7pvl3hac   webserver.2       nginx:latest   docker-desktop   Running         Running 10 seconds ago
+vryhaohhtqwl    \_ webserver.2   nginx:alpine   docker-desktop   Shutdown        Shutdown 11 seconds ago
+norrclgyla07   webserver.3       nginx:latest   docker-desktop   Running         Running 6 seconds ago
+3g50kp4gh09e    \_ webserver.3   nginx:alpine   docker-desktop   Shutdown        Shutdown 7 seconds ago
+
+jasdil@Jasdils-Air docker_compose % docker service rollback webserver
+webserver
+rollback: manually requested rollback
+overall progress: rolling back update: 3 out of 3 tasks
+1/3: running   [>                                                  ]
+2/3: running   [>                                                  ]
+3/3: running   [>                                                  ]
+verify: Service converged
+
+jasdil@Jasdils-Air docker_compose % docker service ps webserver
+ID             NAME              IMAGE          NODE             DESIRED STATE   CURRENT STATE             ERROR     PORTS
+s8zrlx3mojpw   webserver.1       nginx:alpine   docker-desktop   Running         Running 11 seconds ago
+tf25c55jy60e    \_ webserver.1   nginx:latest   docker-desktop   Shutdown        Shutdown 12 seconds ago
+km12davhdwhr    \_ webserver.1   nginx:alpine   docker-desktop   Shutdown        Shutdown 41 seconds ago
+yhi8arr5si3s   webserver.2       nginx:alpine   docker-desktop   Running         Running 15 seconds ago
+5w5i7pvl3hac    \_ webserver.2   nginx:latest   docker-desktop   Shutdown        Shutdown 16 seconds ago
+vryhaohhtqwl    \_ webserver.2   nginx:alpine   docker-desktop   Shutdown        Shutdown 37 seconds ago
+s4mg90honzwz   webserver.3       nginx:alpine   docker-desktop   Running         Running 7 seconds ago
+norrclgyla07    \_ webserver.3   nginx:latest   docker-desktop   Shutdown        Shutdown 8 seconds ago
+3g50kp4gh09e    \_ webserver.3   nginx:alpine   docker-desktop   Shutdown        Shutdown 32 seconds ago
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker network create --driver overlay test-network
+q60lcld6lz7l083mmgm3shct9
+
+jasdil@Jasdils-Air docker_compose % docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+49ddb36b7ccc   bridge            bridge    local
+c04b659c27d4   docker_gwbridge   bridge    local
+03aac638e6b5   host              host      local
+ye6zv6t748ta   ingress           overlay   swarm
+umpo28eqp96e   nginx_default     overlay   swarm
+2e11a392f4a9   none              null      local
+q60lcld6lz7l   test-network      overlay   swarm
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker network create --driver overlay --subnet=10.0.5.0/24 --gateway=10.0.5.1 custom-network
+k2c4j4bfpexnuxs53n2qzeyet
+
+jasdil@Jasdils-Air docker_compose % docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+49ddb36b7ccc   bridge            bridge    local
+k2c4j4bfpexn   custom-network    overlay   swarm
+c04b659c27d4   docker_gwbridge   bridge    local
+03aac638e6b5   host              host      local
+ye6zv6t748ta   ingress           overlay   swarm
+umpo28eqp96e   nginx_default     overlay   swarm
+2e11a392f4a9   none              null      local
+q60lcld6lz7l   test-network      overlay   swarm
+
+jasdil@Jasdils-Air docker_compose % docker inspect custom-network
+[
+    {
+        "Name": "custom-network",
+        "Id": "k2c4j4bfpexnuxs53n2qzeyet",
+        "Created": "2022-12-27T02:27:05.238018783Z",
+        "Scope": "swarm",
+        "Driver": "overlay",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "10.0.5.0/24",
+                    "Gateway": "10.0.5.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": null,
+        "Options": {
+            "com.docker.network.driver.overlay.vxlanid_list": "4100"
+        },
+        "Labels": null
+    }
+]
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker service create --replicas 2 --name webserver1 --network custom-network nginx:alpine
+m5ln0dvpibdu6fotdf6ht927z
+overall progress: 2 out of 2 tasks
+1/2: running   [==================================================>]
+2/2: running   [==================================================>]
+verify: Service converged
+jasdil@Jasdils-Air docker_compose %
+
+#
+# Check wht n/w is attached to specific svc
+#
+jasdil@Jasdils-Air docker_compose % docker inspect hy4h6smdgu0z | grep -A15 "custom-network"
+                        "Name": "custom-network",
+                        "Labels": {},
+                        "DriverConfiguration": {
+                            "Name": "overlay"
+                        },
+                        "IPAMOptions": {
+                            "Driver": {
+                                "Name": "default"
+                            },
+                            "Configs": [
+                                {
+                                    "Subnet": "10.0.5.0/24",
+                                    "Gateway": "10.0.5.1"
+                                }
+                            ]
+                        },
+jasdil@Jasdils-Air docker_compose %
+
+#
+# Check wht containers/services r attached to specific network
+#
+jasdil@Jasdils-Air docker_compose % docker network inspect custom-network | grep -A22 -w Containers
+        "Containers": {
+            "78c33a5161d356247c06babd82fdc70394a1cfbafe5bea6f6ecbcdbac2588619": {
+                "Name": "webserver1.2.50k7u6y4lpsdqf9yx59vnwkmo",
+                "EndpointID": "a04e32424aa487697ea9d61ac885397f7656309233029b27a3ed05b9d4ff61ab",
+                "MacAddress": "02:42:0a:00:05:04",
+                "IPv4Address": "10.0.5.4/24",
+                "IPv6Address": ""
+            },
+            "fa3e137fc24ed4619221e5d88156fa1d366d72c13bcda32901adba20cc10a6fe": {
+                "Name": "webserver1.1.hy4h6smdgu0zyfbrkbuuhp91d",
+                "EndpointID": "320374c857a819af7bd80d81e1bdafb064ef54ebf8441938812ca8a69f371a72",
+                "MacAddress": "02:42:0a:00:05:03",
+                "IPv4Address": "10.0.5.3/24",
+                "IPv6Address": ""
+            },
+            "lb-custom-network": {
+                "Name": "custom-network-endpoint",
+                "EndpointID": "44fc336f244aad019f97e8200dfd294d1321746f9558740e839474940e24b325",
+                "MacAddress": "02:42:0a:00:05:05",
+                "IPv4Address": "10.0.5.5/24",
+                "IPv6Address": ""
+            }
+        },
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker volume create app
+app
+
+jasdil@Jasdils-Air docker_compose % docker volume ls
+DRIVER    VOLUME NAME
+local     app
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker service create --name=webserver1 -p 82:8180 --replicas 2 --mount type=volume,source=app,destination=/var/log nginx:alpine
+ib044vz9d9nx0ukxzgdxe7oho
+overall progress: 2 out of 2 tasks
+1/2: running   [==================================================>]
+2/2: running   [==================================================>]
+verify: Service converged
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker service ps webserver1
+ID             NAME               IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR                              PORTS
+xau6oeq3v6lo   webserver1.1       nginx:alpine   docker-desktop   Running         Running 4 minutes ago
+iapo6j212avp    \_ webserver1.1   nginx:alpine   docker-desktop   Shutdown        Rejected 4 minutes ago   "failed to create symlink: /va…"
+ij5hajznc84k   webserver1.2       nginx:alpine   docker-desktop   Running         Running 4 minutes ago
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker image history nginx:alpine
+IMAGE          CREATED       CREATED BY                                      SIZE      COMMENT
+1e415454686a   13 days ago   /bin/sh -c set -x     && apkArch="$(cat /etc…   29.2MB
+<missing>      13 days ago   /bin/sh -c #(nop)  ENV NJS_VERSION=0.7.9        0B
+<missing>      13 days ago   /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B
+<missing>      13 days ago   /bin/sh -c #(nop)  STOPSIGNAL SIGQUIT           0B
+<missing>      13 days ago   /bin/sh -c #(nop)  EXPOSE 80                    0B
+<missing>      13 days ago   /bin/sh -c #(nop)  ENTRYPOINT ["/docker-entr…   0B
+<missing>      13 days ago   /bin/sh -c #(nop) COPY file:e57eef017a414ca7…   4.62kB
+<missing>      13 days ago   /bin/sh -c #(nop) COPY file:abbcbf84dc17ee44…   1.27kB
+<missing>      13 days ago   /bin/sh -c #(nop) COPY file:5c18272734349488…   2.12kB
+<missing>      13 days ago   /bin/sh -c #(nop) COPY file:7b307b62e82255f0…   1.62kB
+<missing>      13 days ago   /bin/sh -c set -x     && addgroup -g 101 -S …   4.45MB
+<missing>      13 days ago   /bin/sh -c #(nop)  ENV PKG_RELEASE=1            0B
+<missing>      13 days ago   /bin/sh -c #(nop)  ENV NGINX_VERSION=1.23.3     0B
+<missing>      13 days ago   /bin/sh -c #(nop)  LABEL maintainer=NGINX Do…   0B
+<missing>      4 weeks ago   /bin/sh -c #(nop)  CMD ["/bin/sh"]              0B
+<missing>      4 weeks ago   /bin/sh -c #(nop) ADD file:587cae71969871d3c…   7.05MB
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker inspect --format='{{.LogPath}}'  b7e4c472f3ed
+/var/lib/docker/containers/b7e4c472f3ed9192c44022ae49b473537118e102ac4343966e53392ae2cd0a03/b7e4c472f3ed9192c44022ae49b473537118e102ac4343966e53392ae2cd0a03-json.log
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker inspect --format='{{range .NetworkSettings.Networks}}{{.MacAddress}}{{end}}' b7e4c472f3ed
+02:42:0a:00:00:70
+jasdil@Jasdils-Air docker_compose %
+
+docker network inspect custom-network --format='{{.Containers}}'
+docker inspect hy4h6smdgu0z --format='{{.Subnet}}'

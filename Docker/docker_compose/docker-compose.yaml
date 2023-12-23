@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  nginx_alpine:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./app:/usr/share/nginx/html
+  nginx_latest:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/usr/share/nginx/html

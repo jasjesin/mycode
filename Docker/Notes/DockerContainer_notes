@@ -1,0 +1,174 @@
+docker create --name webserver1 -p 80:80 nginx:latest #<-- creates container but doesn't starts it, kind of Pre-PRD Setup
+# or
+docker container create --name webserver -p 81:80 nginx:alpine #<-- creates container but doesn't starts it, kind of Pre-PRD Setup
+
+docker rename <containerID|containerName> <newName> #<-- renames NAME of container
+docker tag nginx:latest nginx:1.0 #<-- kind of creates an alias/symmlink tht points to original image
+
+docker cp index.html <containerName>:/var/www/html #<-- copies file from local path to path inside container
+
+
+jasdil@Jasdils-Air docker_compose % docker images
+REPOSITORY       TAG       IMAGE ID       CREATED       SIZE
+nginx            latest    1403e55ab369   4 days ago    142MB
+nginx            alpine    1e415454686a   12 days ago   40.7MB
+
+jasdil@Jasdils-Air docker_compose % docker tag nginx:alpine nginx:optimized
+
+jasdil@Jasdils-Air docker_compose % docker images
+REPOSITORY       TAG         IMAGE ID       CREATED       SIZE
+nginx            latest      1403e55ab369   4 days ago    142MB
+nginx            alpine      1e415454686a   12 days ago   40.7MB
+nginx            optimized   1e415454686a   12 days ago   40.7MB #<-- CREATED
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker container create --name webserver -p 80:80 nginx:alpine
+7e786c76acb2efdb4bb34eca42b8ed174e5de74b5db83b49dc2a18b6754659d0
+
+jasdil@Jasdils-Air docker_compose % docker create --name webserver1 -p 81:80 nginx:latest
+22a5c318ced5a33d2deb22a75c0a44bbc7623e655814d7ef0902ab14042f0e9d
+
+jasdil@Jasdils-Air docker_compose % docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS    PORTS     NAMES
+22a5c318ced5   nginx:latest   "/docker-entrypoint.…"   4 seconds ago    Created             webserver1
+7e786c76acb2   nginx:alpine   "/docker-entrypoint.…"   25 seconds ago   Created             webserver
+
+jasdil@Jasdils-Air docker_compose % docker create --name webserver1 -p 80:80 ubuntu/apache2
+Unable to find image 'ubuntu/apache2:latest' locally
+latest: Pulling from ubuntu/apache2
+Digest: sha256:0d01271ca9fcca5b6c51d11e18e14d9f113b13df11f6d7f34bfc6a1019856bea
+Status: Downloaded newer image for ubuntu/apache2:latest
+2cfd32081f9ea2d014b6cae5e95d61eb94334ef884e8b29f91f00f1894467618
+
+jasdil@Jasdils-Air docker_compose % docker start webserver1
+webserver1
+
+jasdil@Jasdils-Air docker_compose % vim index.html
+
+jasdil@Jasdils-Air docker_compose % docker cp index.html webserver1:/var/www/html/
+
+jasdil@Jasdils-Air docker_compose % docker exec -ti webserver1 /bin/bash
+root@2cfd32081f9e:/# ls -ltrh /var/www/html/
+total 4.0K
+-rw-r--r-- 1 501 dialout 19 Dec 26 07:06 index.html
+root@2cfd32081f9e:/#
+
+jasdil@Jasdils-Air docker_compose % docker inspect webserver1 | grep IPA
+            "SecondaryIPAddresses": null,
+            "IPAddress": "172.17.0.2",
+                    "IPAMConfig": null,
+                    "IPAddress": "172.17.0.2",
+jasdil@Jasdils-Air docker_compose % docker exec -ti webserver1 /bin/bash
+
+root@2cfd32081f9e:/# curl -k http://172.17.0.2
+bash: curl: command not found
+
+root@2cfd32081f9e:/#
+exit
+
+jasdil@Jasdils-Air docker_compose % curl -k http://172.17.0.2
+^C
+
+jasdil@Jasdils-Air docker_compose % curl -k http://localhost #<-- works from browser as well
+This is a new page
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker container ls #<-- same as docker ps -a
+CONTAINER ID   IMAGE            COMMAND                CREATED         STATUS         PORTS                NAMES
+2cfd32081f9e   ubuntu/apache2   "apache2-foreground"   4 minutes ago   Up 4 minutes   0.0.0.0:80->80/tcp   webserver1
+
+jasdil@Jasdils-Air docker_compose % docker ps -a
+CONTAINER ID   IMAGE            COMMAND                CREATED         STATUS         PORTS                NAMES
+2cfd32081f9e   ubuntu/apache2   "apache2-foreground"   4 minutes ago   Up 4 minutes   0.0.0.0:80->80/tcp   webserver1
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker container logs webserver1 #<-- shows logs of specified container
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2. Set the 'ServerName' directive globally to suppress this message
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2. Set the 'ServerName' directive globally to suppress this message
+[Mon Dec 26 07:05:55.909096 2022] [mpm_event:notice] [pid 24:tid 139829022263168] AH00489: Apache/2.4.54 (Ubuntu) configured -- resuming normal operations
+[Mon Dec 26 07:05:55.922284 2022] [core:notice] [pid 24:tid 139829022263168] AH00094: Command line: '/usr/sbin/apache2 -D FOREGROUND'
+172.17.0.1 - - [26/Dec/2022:07:08:28 +0000] "GET / HTTP/1.1" 200 19
+172.17.0.1 - - [26/Dec/2022:07:09:24 +0000] "GET / HTTP/1.1" 200 19
+172.17.0.1 - - [26/Dec/2022:07:09:24 +0000] "GET /favicon.ico HTTP/1.1" 404 271
+172.17.0.1 - - [26/Dec/2022:07:10:15 +0000] "-" 408 -
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker create --name webserver2 -p 82:80 nginx:alpine
+b9c38f597df60ccc2b19b205587841ef1857881a7df6c48d81518b80ece6c855
+
+jasdil@Jasdils-Air docker_compose % docker start webserver2
+webserver2
+
+jasdil@Jasdils-Air docker_compose % docker container port webserver2 #<-- shows container port exposed to host port
+80/tcp -> 0.0.0.0:82
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % curl http://localhost:82
+###### Redacted #######
+<title>Welcome to nginx!</title>
+###### Redacted #######
+jasdil@Jasdils-Air docker_compose %
+
+jasdil@Jasdils-Air docker_compose % docker history webserver1 #<-- history is for IMAGES ONLY
+Error response from daemon: No such image: webserver1:latest
+
+jasdil@Jasdils-Air docker_compose % docker history nginx #<-- shows wht all has been done wid image
+IMAGE          CREATED      CREATED BY                                      SIZE      COMMENT
+1403e55ab369   4 days ago   /bin/sh -c #(nop)  CMD ["nginx" "-g" "daemon…   0B
+<missing>      4 days ago   /bin/sh -c #(nop)  STOPSIGNAL SIGQUIT           0B
+<missing>      4 days ago   /bin/sh -c #(nop)  EXPOSE 80                    0B
+<missing>      4 days ago   /bin/sh -c #(nop)  ENTRYPOINT ["/docker-entr…   0B
+<missing>      4 days ago   /bin/sh -c #(nop) COPY file:e57eef017a414ca7…   4.62kB
+<missing>      4 days ago   /bin/sh -c #(nop) COPY file:abbcbf84dc17ee44…   1.27kB
+<missing>      4 days ago   /bin/sh -c #(nop) COPY file:5c18272734349488…   2.12kB
+<missing>      4 days ago   /bin/sh -c #(nop) COPY file:7b307b62e82255f0…   1.62kB
+<missing>      4 days ago   /bin/sh -c set -x     && addgroup --system -…   61.3MB
+<missing>      4 days ago   /bin/sh -c #(nop)  ENV PKG_RELEASE=1~bullseye   0B
+<missing>      4 days ago   /bin/sh -c #(nop)  ENV NJS_VERSION=0.7.9        0B
+<missing>      4 days ago   /bin/sh -c #(nop)  ENV NGINX_VERSION=1.23.3     0B
+<missing>      4 days ago   /bin/sh -c #(nop)  LABEL maintainer=NGINX Do…   0B
+<missing>      5 days ago   /bin/sh -c #(nop)  CMD ["bash"]                 0B
+<missing>      5 days ago   /bin/sh -c #(nop) ADD file:73e68ae6852c9afbb…   80.5MB
+jasdil@Jasdils-Air docker_compose %
+
+
+# The following cmd commits a running container's image n adds a comment, to b visible in history
+jasdil@Jasdils-Air docker_compose % docker commit --message "This is Jas, for testing" webserver1 nginx:1.0
+sha256:fa56b0cb7ecccb1832848c7d9972a9a1f1b8421457bfefb90d6a8e19ec8fc8a2
+
+jasdil@Jasdils-Air docker_compose % docker history nginx:1.0
+IMAGE          CREATED          CREATED BY                                      SIZE      COMMENT
+fa56b0cb7ecc   11 seconds ago   apache2-foreground                              690B      This is Jas, for testing
+2534b6844ad0   2 weeks ago      /bin/sh -c #(nop)  CMD ["apache2-foreground"]   0B
+<missing>      2 weeks ago      /bin/sh -c #(nop)  EXPOSE 80                    0B
+<missing>      2 weeks ago      /bin/sh -c #(nop) COPY file:3194a360fd7e7ac5…   218B
+<missing>      2 weeks ago      /bin/sh -c #(nop)  STOPSIGNAL SIGWINCH          0B
+<missing>      2 weeks ago      |0 /bin/sh -c set -eux;  apt-get update;  DE…   119MB
+<missing>      2 weeks ago      /bin/sh -c #(nop)  ENV TZ=UTC                   0B
+<missing>      7 weeks ago      /bin/sh -c #(nop)  CMD ["bash"]                 0B
+<missing>      7 weeks ago      /bin/sh -c #(nop) ADD file:2949b15e95219d5c7…   70.2MB
+jasdil@Jasdils-Air docker_compose %
+
+
+<<Add docker_image_build.mov>>
+
+docker build -t <imageName>:<tag> <Path|URL>
+
+jasdil@Jasdils-Air Docker % docker images
+REPOSITORY       TAG       IMAGE ID       CREATED         SIZE
+apache2          latest    fcd8cee5444c   6 minutes ago   226MB
+nginx            latest    1403e55ab369   4 days ago      142MB
+nginx            alpine    1e415454686a   12 days ago     40.7MB
+ubuntu/apache2   latest    2534b6844ad0   2 weeks ago     189MB
+jasdil@Jasdils-Air Docker %
+
+
+
++++++++++++++++++++++++++++++++++++++
+Completed:
+docker create container / container create
+docker cp
+docker commit
+docker run #<-- to add start wid create
+docker container image creation using dockerfile
++++++++++++++++++++++++++++++++++++++

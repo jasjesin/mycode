@@ -1,0 +1,102 @@
+URL used to install n use docker-compose:
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04
+
+Difference between docker run & docker-compose:
+https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/Docker-run-vs-docker-compose-Whats-the-difference
+
+--rm in docker run removes container right after you come out of container shell. This works more like a dry-run.
+      This is used more for testing purpose to see if image is pulled fine, and container starts without any issues.
+
+[] Docker run cmd wid cpu/mem/volume settings:
+docker volume create website
+docker run -d -ti --name=webserver --cpus=1.5 --memory=2048m -p 80:80 -v ./website:/usr/share/nginx/html nginx:latest
+
+
+[] Linking two containers: docker-compose
+
+Step 1 — Installing Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+Step 2 — Setting Up a docker-compose.yml File
+mkdir ~/compose-demo
+cd ~/compose-demo
+mkdir app
+
+vim app/index.html
+==================================================
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Docker Compose Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+</head>
+<body>
+
+    <h1>This is a Docker Compose Demo Page.</h1>
+    <p>This content is being served by an Nginx container.</p>
+
+</body>
+</html>
+==================================================
+
+vim docker-compose.yml
+=======================================
+version: '3.3'
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./app:/usr/share/nginx/html
+========================================
+
+========================================
+version: '3.3'
+services:
+  nginxsvc:
+    container_name: my1stwebsite
+    image: ubuntu/apache2
+    ports:
+    -  "84:80"
+    volumes:
+      website:/usr/share/nginx/html
+  tomcatsvc:
+    container_name: my2ndwebsite
+    image: tomcat:latest
+    ports:
+    -  "85:80"
+========================================
+
+docker-compose up -d --rm #<-- dry-run, container  automatically gets exited
+docker-compose up -d
+docker-compose ps
+docker-compose logs
+docker-compose pause #<-- to pause the environment execution without changing the current state of your containers
+docker-compose unpause
+docker-compose stop #<-- terminate the container execution, but it won’t destroy any data associated with your containers
+docker-compose down #<-- to remove the containers, networks, and volumes associated with this containerized environment
+docker image rm nginx:alpine #<-- to also remove the base image from your system
+
+[] after startup, how u login to container n troubleshoot logs >>
+docker run -d -ti --name=test ubuntu:5.0 /bin/bash
+
+# or, to get inside container manually, in bash shell
+docker ps-a
+docker exec -ti <containerID> /bin/bash
+
+# inside the container
+cd /var/log/apache2
+service apache2 start
+cat error.log #<-- u will see logs now
+cat access.log
+
+Load-balancing is alwys recommended b/w containers deployed on separate nodes, not on same nodes.
+on same nodes, deploy containers of different apps.
+
+[] ingress n overlay n/ws
+
+docker, k8s, ansible, puppet -- thru jenkins; n then cloud

@@ -1,0 +1,432 @@
+URL to refer:
+https://www.dataquest.io/blog/install-and-configure-docker-swarm-on-ubuntu/
+
+[] Setup Manager (works as orchestrator):
+docker swarm init --advertise-addr <IPAddress>
+
+        jasdil@Jasdils-Air Docker % docker swarm init --advertise-addr 172.124.234.129
+        Swarm initialized: current node (z4odl0mcn9qj90m214hw0hxem) is now a manager.
+
+        To add a worker to this swarm, run the following command:
+
+            docker swarm join --token SWMTKN-1-434nqr75jmrtrwo8fzs6psg9rhbaw45ayiqpxvhn4y8n20553b-1by1a7evxfx7qwdy0pnh30v7f 172.124.234.129:2377
+
+        To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+docker node ls #<-- checks status
+
+        jasdil@Jasdils-Air Docker % docker node ls
+        ID                            HOSTNAME         STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+        z4odl0mcn9qj90m214hw0hxem *   docker-desktop   Ready     Active         Leader           20.10.21
+        jasdil@Jasdils-Air Docker %
+
+
+[] Setup worker: docker swarm cmds work on mgr only, not on worker
+# use this to make any node join to this mgr as worker node
+docker swarm join --token SWMTKN-1-434nqr75jmrtrwo8fzs6psg9rhbaw45ayiqpxvhn4y8n20553b-1by1a7evxfx7qwdy0pnh30v7f 172.124.234.129:2377
+
+
+[] create a svc:
+docker service create --name=webserver -p 85:80 httpd
+docker service create --replicas 10 --name=webserver -p 85:80 nginx #<-- creates 10 replicas during creation itself
+docker node ps <Mgr|Worker NodeName> #<-- lists wht all containers r running on specified node
+docker node inspect <Mgr|Worker NodeName> #<-- shows details for specified node
+docker node update --availability=drain <Mgr|Worker NodeName> #<-- shuts down containers n spawns on other nodes
+docker service ps <svcName>
+docker service rm <svcID|svcName>
+docker service ls #<-- lists all svcs started, using docker swarm
+docker node ls #<-- lists mg n worker nodes
+docker service scale <svcName>=<count> #<-- this is total count, not additional count.
+      # This load balances & creates containers on worker nodes as well as mgr node.
+      # If worker node dies down, then all those containers loaded on worker node, get load balanced to other nodes,
+      # including on mgr node as well takes the load and works as worker node too, to share the load.
+<<<Attach dockerswarmlb>>
+
+
+        jasdil@Jasdils-Air Docker % docker service create --name=webserver1 -p 86:80 nginx
+        auyxgnly0hklz855jyteks9gm
+        overall progress: 1 out of 1 tasks
+        1/1: running   [==================================================>]
+        verify: Service converged
+
+        jasdil@Jasdils-Air Docker % docker service ps webserver1
+        ID             NAME           IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+        nu5ilqo27k82   webserver1.1   nginx:latest   docker-desktop   Running         Running 11 seconds ago
+
+        jasdil@Jasdils-Air Docker % docker service scale webserver1=3
+        webserver1 scaled to 3
+        overall progress: 3 out of 3 tasks
+        1/3: running   [==================================================>]
+        2/3: running   [==================================================>]
+        3/3: running   [==================================================>]
+        verify: Service converged
+
+        jasdil@Jasdils-Air Docker % docker service ps webserver1
+        ID             NAME           IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+        nu5ilqo27k82   webserver1.1   nginx:latest   docker-desktop   Running         Running 3 minutes ago
+        wa15ae8nfmqh   webserver1.2   nginx:latest   docker-desktop   Running         Running 12 seconds ago
+        l14o1e7r9q7c   webserver1.3   nginx:latest   docker-desktop   Running         Running 12 seconds ago
+        jasdil@Jasdils-Air Docker %
+
+        jasdil@Jasdils-Air Docker % docker ps -a
+        CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS     NAMES
+        2ff35d4e1b48   nginx:latest   "/docker-entrypoint.…"   17 minutes ago   Up 17 minutes   80/tcp    webserver1.2.wa15ae8nfmqhjha9nnbabyton
+        0cc359f3b5c8   nginx:latest   "/docker-entrypoint.…"   17 minutes ago   Up 17 minutes   80/tcp    webserver1.3.l14o1e7r9q7c4k72d9tknreld
+        fd96571101be   nginx:latest   "/docker-entrypoint.…"   20 minutes ago   Up 20 minutes   80/tcp    webserver1.1.nu5ilqo27k82b73ga6zf3o0py
+
+        jasdil@Jasdils-Air Docker % docker service ls
+        ID             NAME         MODE         REPLICAS   IMAGE                   PORTS
+        p65xnx5i9fu1   webserver    replicated   1/1        ubuntu/apache2:latest   *:8280->80/tcp
+        kh6klyq0mol4   webserver1   replicated   0/1        apache2:latest          *:8180->80/tcp
+        wscamy0unmld   webserver2   replicated   1/1        nginx:latest            *:8080->80/tcp
+        jasdil@Jasdils-Air Docker %
+
+        jasdil@Jasdils-Air Docker % docker service rm webserver1
+        webserver1
+
+        jasdil@Jasdils-Air Docker % docker service ps webserver1
+        no such service: webserver1
+
+        jasdil@Jasdils-Air Docker % docker ps -a
+        CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+        jasdil@Jasdils-Air Docker %
+
+        jasdil@Jasdils-Air Docker % docker service create --replicas 10 --name=webserver -p 85:80 nginx
+        wn6nfn4hfikoa68dzlc9lik0r
+        overall progress: 10 out of 10 tasks
+        1/10: running
+        2/10: running
+        3/10: running
+        4/10: running
+        5/10: running
+        6/10: running
+        7/10: running
+        8/10: running
+        9/10: running
+        10/10: running
+        verify: Service converged
+
+        jasdil@Jasdils-Air Docker % docker service ps webserver
+        ID             NAME           IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+        o41r9qklzlz1   webserver.1    nginx:latest   docker-desktop   Running         Running 22 seconds ago
+        xshisdu7yqc9   webserver.2    nginx:latest   docker-desktop   Running         Running 22 seconds ago
+        jpapthrladch   webserver.3    nginx:latest   docker-desktop   Running         Running 23 seconds ago
+        r5ku2lwfcv00   webserver.4    nginx:latest   docker-desktop   Running         Running 22 seconds ago
+        34mrv2ufuzn0   webserver.5    nginx:latest   docker-desktop   Running         Running 23 seconds ago
+        y4ju7go60p5g   webserver.6    nginx:latest   docker-desktop   Running         Running 23 seconds ago
+        jqwt4xr8j1n9   webserver.7    nginx:latest   docker-desktop   Running         Running 23 seconds ago
+        7f59cu4ej1tp   webserver.8    nginx:latest   docker-desktop   Running         Running 23 seconds ago
+        40bmoajqs162   webserver.9    nginx:latest   docker-desktop   Running         Running 22 seconds ago
+        lxrhkjihignj   webserver.10   nginx:latest   docker-desktop   Running         Running 23 seconds ago
+
+        jasdil@Jasdils-Air Docker % docker service scale webserver=4
+        webserver scaled to 4
+        overall progress: 4 out of 4 tasks
+        1/4: running
+        2/4: running
+        3/4: running
+        4/4: running
+        verify: Service converged
+
+        jasdil@Jasdils-Air Docker % docker service ps webserver
+        ID             NAME          IMAGE          NODE             DESIRED STATE   CURRENT STATE            ERROR     PORTS
+        o41r9qklzlz1   webserver.1   nginx:latest   docker-desktop   Running         Running 41 seconds ago
+        xshisdu7yqc9   webserver.2   nginx:latest   docker-desktop   Running         Running 41 seconds ago
+        jpapthrladch   webserver.3   nginx:latest   docker-desktop   Running         Running 42 seconds ago
+        r5ku2lwfcv00   webserver.4   nginx:latest   docker-desktop   Running         Running 41 seconds ago
+
+        jasdil@Jasdils-Air Docker % docker service ls
+        ID             NAME        MODE         REPLICAS   IMAGE          PORTS
+        wn6nfn4hfiko   webserver   replicated   4/4        nginx:latest   *:85->80/tcp
+
+        jasdil@Jasdils-Air Docker % docker service rm webserver
+        webserver
+
+        jasdil@Jasdils-Air Docker % docker service ls
+        ID        NAME      MODE      REPLICAS   IMAGE     PORTS
+
+
+[] Drain for system updates or rolling updates:
+This sets specified node to drain all containers on it n boot those containers on other nodes
+
+      jasdil@Jasdils-Air Docker % docker node ls
+      ID                            HOSTNAME         STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+      z4odl0mcn9qj90m214hw0hxem *   docker-desktop   Ready     Active         Leader           20.10.21
+
+      jasdil@Jasdils-Air Docker % docker node update --availability=drain docker-desktop
+      docker-desktop
+
+      jasdil@Jasdils-Air Docker % docker node ls
+      ID                            HOSTNAME         STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+      z4odl0mcn9qj90m214hw0hxem *   docker-desktop   Ready     Drain          Leader           20.10.21
+
+      jasdil@Jasdils-Air Docker % docker service ls
+      ID             NAME        MODE         REPLICAS   IMAGE          PORTS
+      lfnpjhnc3bsz   webserver   replicated   0/3        nginx:latest   *:85->80/tcp
+
+      jasdil@Jasdils-Air Docker % docker service ps webserver
+      ID             NAME              IMAGE          NODE             DESIRED STATE   CURRENT STATE             ERROR                              PORTS
+      l45l8i0fwjut   webserver.1       nginx:latest                    Running         Pending 16 seconds ago    "no suitable node (1 node not …"
+      zzmdjh5q0s30    \_ webserver.1   nginx:latest   docker-desktop   Shutdown        Shutdown 13 seconds ago
+      vodyn2h9lkg6   webserver.2       nginx:latest                    Running         Pending 16 seconds ago    "no suitable node (1 node not …"
+      xjtmii190j35    \_ webserver.2   nginx:latest   docker-desktop   Shutdown        Shutdown 13 seconds ago
+      ysjy1hm1beof   webserver.3       nginx:latest                    Running         Pending 16 seconds ago    "no suitable node (1 node not …"
+      paeqkhml5msu    \_ webserver.3   nginx:latest   docker-desktop   Shutdown        Shutdown 13 seconds ago
+      jasdil@Jasdils-Air Docker % docker node update --availability=active docker-desktop
+      docker-desktop
+
+      jasdil@Jasdils-Air Docker % docker service ps webserver
+      ID             NAME              IMAGE          NODE             DESIRED STATE   CURRENT STATE                    ERROR     PORTS
+      l45l8i0fwjut   webserver.1       nginx:latest   docker-desktop   Running         Running less than a second ago
+      zzmdjh5q0s30    \_ webserver.1   nginx:latest   docker-desktop   Shutdown        Shutdown 49 seconds ago
+      vodyn2h9lkg6   webserver.2       nginx:latest   docker-desktop   Running         Running less than a second ago
+      xjtmii190j35    \_ webserver.2   nginx:latest   docker-desktop   Shutdown        Shutdown 49 seconds ago
+      ysjy1hm1beof   webserver.3       nginx:latest   docker-desktop   Running         Running less than a second ago
+      paeqkhml5msu    \_ webserver.3   nginx:latest   docker-desktop   Shutdown        Shutdown 48 seconds ago
+      jasdil@Jasdils-Air Docker %
+
+
+apache2 runs on ubuntu, httpd runs on centos
+
+alwys say I KNOW wid CONFIDENCE, its all simple
+  mgr is needed as a monitoring tool to manage/orchestrate/load-balance requests on all containers on all nodes,
+
+swarmpit is UI version of Docker Swarm
+Be strong in CLI....UI any1 can do
+
+[] rolling updates:
+For updating image to roll out to nodes, execute following command>>
+docker service update --image <imageName>:<version> <serviceName>
+
+      jasdil@Jasdils-Air Docker % docker service update --image nginx:alpine webserver
+      webserver
+      overall progress: 3 out of 3 tasks
+      1/3: running   [==================================================>]
+      2/3: running   [==================================================>]
+      3/3: running   [==================================================>]
+      verify: Service converged
+
+      jasdil@Jasdils-Air Docker % docker service ps webserver
+      ID             NAME              IMAGE          NODE             DESIRED STATE   CURRENT STATE             ERROR     PORTS
+      kxhe8kldv2yv   webserver.1       nginx:alpine   docker-desktop   Running         Running 10 seconds ago
+      xci0oja5z9cf    \_ webserver.1   nginx:latest   docker-desktop   Shutdown        Shutdown 11 seconds ago
+      d1tlw9fldi74   webserver.2       nginx:alpine   docker-desktop   Running         Running 18 seconds ago
+      hsxltdq7fd6m    \_ webserver.2   nginx:latest   docker-desktop   Shutdown        Shutdown 20 seconds ago
+      6arh3axwxrk6   webserver.3       nginx:alpine   docker-desktop   Running         Running 14 seconds ago
+      jmp52xknl3m0    \_ webserver.3   nginx:latest   docker-desktop   Shutdown        Shutdown 15 seconds ago
+
+      jasdil@Jasdils-Air Docker % docker service update --image nginx:latest webserver
+      webserver
+      overall progress: 3 out of 3 tasks
+      1/3: running   [==================================================>]
+      2/3: running   [==================================================>]
+      3/3: running   [==================================================>]
+      verify: Service converged
+
+      jasdil@Jasdils-Air Docker % docker service ps webserver
+      ID             NAME              IMAGE          NODE             DESIRED STATE   CURRENT STATE             ERROR     PORTS
+      wgteu41abll3   webserver.1       nginx:latest   docker-desktop   Running         Running 7 seconds ago
+      kxhe8kldv2yv    \_ webserver.1   nginx:alpine   docker-desktop   Shutdown        Shutdown 8 seconds ago
+      xci0oja5z9cf    \_ webserver.1   nginx:latest   docker-desktop   Shutdown        Shutdown 49 seconds ago
+      q9b44vihj7t4   webserver.2       nginx:latest   docker-desktop   Running         Running 11 seconds ago
+      d1tlw9fldi74    \_ webserver.2   nginx:alpine   docker-desktop   Shutdown        Shutdown 12 seconds ago
+      hsxltdq7fd6m    \_ webserver.2   nginx:latest   docker-desktop   Shutdown        Shutdown 59 seconds ago
+      aj1sxt9a6fhj   webserver.3       nginx:latest   docker-desktop   Running         Running 15 seconds ago
+      6arh3axwxrk6    \_ webserver.3   nginx:alpine   docker-desktop   Shutdown        Shutdown 16 seconds ago
+      jmp52xknl3m0    \_ webserver.3   nginx:latest   docker-desktop   Shutdown        Shutdown 54 seconds ago
+      jasdil@Jasdils-Air Docker %
+
+docker swarm init autolock #<-- enables autolock, and generates secret key.
+                           # each time, any node dies n needs to get back to pool, secret key needs to be provided.
+# or
+docker swarm update --autolock=true #<-- enables autolock on running swarm
+docker swarm unlock-key #<-- type key to unlock
+<<Add autolock>>
+
+docker swarm join-token worker #<-- get token for to join as new worker
+docker swarm join-token manager #<-- get token for to join as new manager
+docker swarm leave #<-- to leave worker node from swarm, this NEEDS to be EXECUTED FROM WORKER NODE
+docker node rm <WorkerNodeName> #<-- to remove worker node from swarm
+docker node promote <NodeName> #<-- to promote a worker node as mgr
+<<Add promote>>
+
+docker node demote <NodeName> #<-- to demote a mgr node as worker
+<<Add demote>>
+
+Docker swarm switching leader, when original leader dies down
+<<Add Leader_switch>>
+<<Add switchLeader>>
+
+The restarted docker node in mgr cluster stays UNREACHABLE, till secret key is not passed from that restarted node.
+Its status becomes REACHABLE, only after passing secret key
+
+
+        jasdil@Jasdils-Air Downloads % docker swarm join-token worker
+        To add a worker to this swarm, run the following command:
+
+            docker swarm join --token SWMTKN-1-434nqr75jmrtrwo8fzs6psg9rhbaw45ayiqpxvhn4y8n20553b-1by1a7evxfx7qwdy0pnh30v7f 172.124.234.129:2377
+
+        jasdil@Jasdils-Air Downloads % docker swarm join-token manager
+        To add a manager to this swarm, run the following command:
+
+            docker swarm join --token SWMTKN-1-434nqr75jmrtrwo8fzs6psg9rhbaw45ayiqpxvhn4y8n20553b-29vgk8fvkje07e9d81iuu8ps9 172.124.234.129:2377
+
+
+[] Mapping to Kubernetes:
+URL used: https://www.cloudsigma.com/how-to-install-and-use-kubernetes-on-ubuntu-20-04/
+
+1. To join a worker node to master/mgr:
+kubeadm join <masterNodeIP:Port> --token <tokenValue> --discover-token-ca-cert-hash <value>
+docker swarm join -- token <tokenValue> <masterNodeIP:Port>
+
+2. Create deployment/container:
+kubectl create deployment nginx --image=nginx
+docker create container --name=nginx nginx
+
+3. Create service:
+kubectl create service nodeport nginx --tcp=80:80
+docker service create --name=nginx -p 80:80 nginx
+
+4. Arch setup:
+k8s:    Control Plane / Master node cluster & Slave/Worker nodes
+Docker Swarm: Manager / Master node cluster & Worker       nodes
+
+5. Installation
+K8s needs to be installed on all nodes, be it master or slave/worker nodes. Need to configure n/w & setup cluster.
+Docker Swarm needs to be installed only on master node, not on worker nodes. NO NEED to configure n/w & setup cluster.
+
+kubectl describe nodes <nodeName> = docker inspect
+
+Swarm Steps:
+1. Create Manager Node with docker swarm init, with key/token generated
+2. Add worker nodes by using key/token
+3. Create service/cluster
+4. Scaling svc
+5. shutdown 1 of workers, and its containers getting created on rest of leftover worker/master
+
+
+vmware workstation to create VMs in laptop
+
+=======================
+NEW FROM HERE
+=======================
+
+jasdil@Jasdils-Air Downloads % docker service ls
+ID             NAME        MODE         REPLICAS   IMAGE          PORTS
+kna5fs74ix0b   webserver   replicated   2/2        nginx:latest   *:85->80/tcp
+jasdil@Jasdils-Air Downloads % docker service inspect --pretty kna5fs74ix0b
+
+ID:		kna5fs74ix0bmh494ubjb0z22
+Name:		webserver
+Service Mode:	Replicated
+ Replicas:	2
+Placement:
+UpdateConfig:
+ Parallelism:	1
+ On failure:	pause
+ Monitoring Period: 5s
+ Max failure ratio: 0
+ Update order:      stop-first
+RollbackConfig:
+ Parallelism:	1
+ On failure:	pause
+ Monitoring Period: 5s
+ Max failure ratio: 0
+ Rollback order:    stop-first
+ContainerSpec:
+ Image:		nginx:latest@sha256:0047b729188a15da49380d9506d65959cce6d40291ccfb4e039f5dc7efd33286
+ Init:		false
+Resources:
+Endpoint Mode:	vip
+Ports:
+ PublishedPort = 85
+  Protocol = tcp
+  TargetPort = 80
+  PublishMode = ingress
+
+jasdil@Jasdils-Air Downloads %
+
+
+docker service create --name=webserver -p:81:80 ubuntu/apache2
+
+jasdil@Jasdils-Air Docker % docker service create name=webserver1 -p 81:80 ubuntu/apache2
+Error response from daemon: rpc error: code = InvalidArgument desc = ContainerSpec: "name=webserver1" is not a valid repository/tag
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver1 -p 81:80 ubuntu/apache2
+jkq15uxv65f5y3c19j9ujc92p
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver1 -p 81:80 replicas 2 nginx:alpine
+Error response from daemon: rpc error: code = InvalidArgument desc = port '81' is already in use by service 'webserver1' (jkq15uxv65f5y3c19j9ujc92p) as an ingress port
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver1 -p 82:80 replicas 2 nginx:alpine
+Error response from daemon: rpc error: code = AlreadyExists desc = name conflicts with an existing object: service webserver1 already exists
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver2 -p 82:80 replicas 2 nginx:alpine
+image replicas:latest could not be accessed on a registry to record
+its digest. Each node will access replicas:latest independently,
+possibly leading to different nodes running different
+versions of the image.
+
+etvl1o6t63gx03hrt8kqky19w
+overall progress: 0 out of 1 tasks
+1/1: No such image: replicas:latest
+^COperation continuing in background.
+Use `docker service ps etvl1o6t63gx03hrt8kqky19w` to check progress.
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver2 -p 82:80 replicas=2 nginx:alpine
+Error response from daemon: rpc error: code = InvalidArgument desc = ContainerSpec: "replicas=2" is not a valid repository/tag
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver2 -p 82:80 --replicas=2 nginx:alpine
+Error response from daemon: rpc error: code = InvalidArgument desc = port '82' is already in use by service 'webserver2' (etvl1o6t63gx03hrt8kqky19w) as an ingress port
+
+jasdil@Jasdils-Air Docker % docker service stop webserver2
+
+Usage:  docker service COMMAND
+
+Manage services
+
+Commands:
+  create      Create a new service
+  inspect     Display detailed information on one or more services
+  logs        Fetch the logs of a service or task
+  ls          List services
+  ps          List the tasks of one or more services
+  rm          Remove one or more services
+  rollback    Revert changes to a service's configuration
+  scale       Scale one or multiple replicated services
+  update      Update a service
+
+Run 'docker service COMMAND --help' for more information on a command.
+
+jasdil@Jasdils-Air Docker % docker service rm webserver2
+webserver2
+
+jasdil@Jasdils-Air Docker % docker service create --name=webserver2 -p 82:80 --replicas=2 nginx:alpine
+rohkymy80vdqukke54ciwdmgi
+overall progress: 2 out of 2 tasks
+1/2: running   [==================================================>]
+2/2: running   [==================================================>]
+verify: Service converged
+jasdil@Jasdils-Air Docker %
+
+jasdil@Jasdils-Air Docker % docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+49ddb36b7ccc   bridge            bridge    local
+c04b659c27d4   docker_gwbridge   bridge    local
+03aac638e6b5   host              host      local
+ye6zv6t748ta   ingress           overlay   swarm
+2e11a392f4a9   none              null      local
+jasdil@Jasdils-Air Docker %
+
+
+
+The overlay network driver creates a distributed network among multiple Docker daemon hosts.
+This network sits on top of (overlays) the host-specific networks, allowing containers connected to it
+(including swarm service containers) to communicate securely when encryption is enabled
+
+When you initialize a swarm or join a Docker host to an existing swarm,
+two new networks are created on that Docker host: an overlay network called ingress ,
+which handles the control and data traffic related to swarm services.

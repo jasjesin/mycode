@@ -1,0 +1,70 @@
+# PATH based ROUTING example
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress                     #<-- NO nodePort used, type is ClusterIP, not LoadBalancer, as is case wid internal svc
+metadata:
+  name: test-ingress
+  namespace: default              #<-- name n namespace should be same as defined for svc n pod
+spec:
+  rules:                          #<-- routing rules
+  - host: testapp.com             #<-- should b valid domain address, should map to IP address of entrypoint of k8s cluster (ctrl plane?)
+                                  #<-- main address / domain name, fwds incoming requests to internal svcs, based on URL context
+    http:                         #<-- This http is the protocol to be used for fwding requests frm ingress to internal svcs
+      paths:
+      - path: /test               #<-- PATH-based ROUTING
+        backend:
+        serviceName: test-svc     #<-- same as metadata name of svc, defined in svc's yaml file
+        servicePort: 27017        #<-- svc port defined in svc's yaml file
+      - path: /test1
+        backend:
+        serviceName: test1-svc     #<-- same as metadata name of svc, defined in svc's yaml file
+        servicePort: 8080        #<-- svc port defined in svc's yaml file
+---
+# HOST based ROUTING example
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress                     #<-- NO nodePort used, type is ClusterIP, not LoadBalancer, as is case wid internal svc
+metadata:
+  name: test-ingress
+  namespace: default              #<-- name n namespace should be same as defined for svc n pod
+spec:
+  rules:                          #<-- routing rules
+  - host: test.testapp.com        #<-- should b valid domain address, should map to IP address of entrypoint of k8s cluster (ctrl plane?)
+                                  #<-- main address / domain name, fwds incoming requests to internal svcs, based on URL context
+    http:                         #<-- This http is the protocol to be used for fwding requests frm ingress to internal svcs
+      paths:                      #<-- HOST-based ROUTING
+        backend:
+        serviceName: test-svc     #<-- same as metadata name of svc, defined in svc's yaml file
+        servicePort: 27017        #<-- svc port defined in svc's yaml file
+  - host: test.testapp.com
+    http:
+      paths: 
+        backend:
+        serviceName: test1-svc     #<-- same as metadata name of svc, defined in svc's yaml file
+        servicePort: 8080        #<-- svc port defined in svc's yaml file
+---
+# HOST based ROUTING example
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress                     #<-- NO nodePort used, type is ClusterIP, not LoadBalancer, as is case wid internal svc
+metadata:
+  name: test-ingress
+  namespace: default              #<-- name n namespace should be same as defined for svc n pod
+spec:
+  tls:
+  - hosts:
+    - testapp.com
+    secretName: testapp-tls-secret
+  rules:                          #<-- routing rules
+  - host: test.testapp.com        #<-- should b valid domain address, should map to IP address of entrypoint of k8s cluster (ctrl plane?)
+                                  #<-- main address / domain name, fwds incoming requests to internal svcs, based on URL context
+    http:                         #<-- This http is the protocol to be used for fwding requests frm ingress to internal svcs
+      paths:                      #<-- HOST-based ROUTING
+        backend:
+        serviceName: test-svc     #<-- same as metadata name of svc, defined in svc's yaml file
+        servicePort: 27017        #<-- svc port defined in svc's yaml file
+  - host: test.testapp.com
+    http:
+      paths: 
+        backend:
+        serviceName: test1-svc     #<-- same as metadata name of svc, defined in svc's yaml file
+        servicePort: 8080        #<-- svc port defined in svc's yaml file
+
+ 

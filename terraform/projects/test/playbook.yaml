@@ -1,0 +1,19 @@
+---
+- name: apply common cfg to all nodes
+  hosts: all
+  remote_user: root
+  roles:
+    - common
+
+- name: configure and deploy controlplane
+  hosts: controlplane
+  remote_user: root
+
+  roles:
+    - kubernetes controlplane
+
+- name: configure and deploy workers
+  hosts: workers
+  remote_user: root
+  roles:
+    - kubernetes workers

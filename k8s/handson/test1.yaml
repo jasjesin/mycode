@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test1-deployment
+  labels:
+    app: test1app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test1app
+  template:                       #<-- defines template for a pod's configuration like pod label/name, container spec
+    metadata:
+      labels:
+        app: test1app
+    spec:
+      containers:
+        - name: test1
+          image: mongo-express
+          ports:
+          - containerPort: 8080
+          env:                    #<-- specifies creation n use of env variables (to be defined below)
+#          - name: ME_CONFIG_MONGODB_ENABLE_ADMIN
+#            value: "false"
+          - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+            valueFrom:            #<-- informing where to fetch value from
+              secretKeyRef:       #<-- informing that data needs to be fetched from a secret file's key
+                name: test-secret #<-- metadata name from secret file
+                key: uid          #<-- data keyname from secret file
+          - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-secret
+                key: passwd
+          - name: ME_CONFIG_MONGODB_SERVER
+            valueFrom:
+              configMapKeyRef:
+                name: test-configmap
+                key: url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test1-svc
+spec:
+  selector:
+    app: test1app
+  type: LoadBalancer              #<-- accepts external requests, by assigning svc & external IP address
+
+  ports:
+  - protocol: TCP
+    port: 8080                    #<-- svc port
+    targetPort: 8080              #<-- containerPort of deployment
+    nodePort: 30000               #<-- port whr external IP address will be open, to access from browser
+                                  #<-- This nodePort has a range b/w 30000-32767

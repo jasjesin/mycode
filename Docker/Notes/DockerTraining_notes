@@ -1,0 +1,80 @@
+apt-get install docker.io -- installs docker
+apt-get remove docker -- uninstalls docker
+
+docker images -- gives list of images
+docker ps -a -- shows list of container(s) processes running
+docker run -d -ti ubuntu:5.0 /bin/bash -- -d is detached/daemon/bkgrnd mode, -it is for interactive terminal
+docker run -d -ti ubuntu:5.0 /bin/bash -- started 2nd container
+docker network ls -- shows list of networks setup for containers n host
+docker ps -a --> fetch ContainerID
+docker inspect <ContainerID> -- shows all details. Fetch IP address of it
+docker exec -ti <ContainerID> /bin/bash -- to login to container
+          apt-get install net-tools <-- gets u ifconfig cmd to work
+          ifconfig -- provides IP address as well as inet <IPAddress>
+          apt-get install inetutils-ping <-- get u ping cmd to work
+
+docker exec -ti <ContainerID> /bin/bash -- to login to 1st container
+inside the container of ubuntu, execute >>
+service apache2 status
+service apache2 start
+apt-get install lynx
+apt-get install telnet
+apt-get install sshd
+apt-get install openssh-server
+telnet <IPAddress_of_2nd_container> 80 <-- to test connectivity to 2nd container at port 80
+telnet <IPAddress_of_2nd_container> 22 <-- wont work as sshd svc is not setup
+lynx http://<IPAddress_of_2nd_container> -- linux CLI browser -- should b able to access svc of
+                                                                  2nd container from 1st container, but svc looks down
+Try again, after apache svc is started up on 2nd container n it should work.
+apt-get install sshd
+apt-get install openssh-server
+service ssh restart
+
+Try sshd svc too, after its setup
+
+
+
+docker exec -ti <ContainerID> /bin/bash -- to login to 2nd container
+service apache2 status
+service apache2 start
+apt-get install telnet
+telnet <IPAddress_of_1st_container> 80 <-- to test connectivity to 1st container at port 80
+lynx http://<IPAddress_of_1st_container> -- linux CLI browser -- should b able to access svc of
+                                                                  1st container from 2nd container
+
+apt-get install sshd
+apt-get install openssh-server
+service ssh restart
+
+telnet <IPAddress_of_1st_container> 22 <-- should work after sshd is setup n started up
+
+
+So, both containers communicate internally, ports r open to each other.
+How to expose port no. from outside, then storage, then k8s
+
+The beauty abt docker is that its just a small container, whtever i want, i can install n play wid this container
+
+after getting outside of the container, from the main host,
+  ssh, lynx, ping, telnet to port 80 n 22 to container should work
+
+But the URL wont work from browser cuz port is not exposed
+to expose port, -p <containerPort>:<hostPort> wid docker run...couldn't find if it works wid running container
+
+docker run -d -ti -p 8080:8080 ubuntu:5.0 /bin/bash -- port exposed to host for outside world access
+docker run -d -ti -p 8081:8081 ubuntu:5.0 /bin/bash -- same stuff for 2nd container
+
+
+[] Docker Storage/Volume:
+
+docker volume create data     -- creates volume
+docker volume create software -- 2nd volume
+docker volume ls              -- lists volume
+
+To mount volume, couldn't find attaching data to live container, need to use docker run
+
+docker run -d -ti -p 8080:8080 -v data:/data ubuntu:5.0 /bin/bash -- port exposed to host for outside world access
+docker run -d -ti -p 8081:8081 -v software:/software ubuntu:5.0 /bin/bash -- same stuff for 2nd container
+docker volume inspect data <-- gives path of mount point like /var/lib/docker/volumes/data/_data
+
+In docker run command, image should alwys be specified in the end, followed by /bin/bash (optional)
+    -p, -v should be specified beforehand

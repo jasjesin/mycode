@@ -1,0 +1,307 @@
+
+
+ container is a new instance of an image
+ docker run --> pulls image from registry, if not present locally & launches new container wid the image
+ <<Add docker_golbal_arch>>
+
+[] How to install docker on VM:
+apt -y install docker.io
+docker version
+
+after install, docker will setup its own n/w
+ip addr
+
+This IP is internal IP for container env.
+If any of the containers die, new container will b started wid next avl IP address
+
+All containers can see this IP
+
+To reach container ap, remotely,
+
+[] how to load images in docker environment
+ docker images #<-- shows list of images running currently
+ docker pull mysql #<-- pulls latest image version
+ docker images #<-- will now show new image in output
+ #output>>
+ REPOSITORY   TAG     IMAGE ID      CREATED     SIZE
+ mysql        latest  667ee8fb158e  3 days ago  521MB
+
+ if specific version is needed >>
+docker pull mysql:5.7.27
+docker images
+REPOSITORY   TAG     IMAGE ID      CREATED      SIZE
+mysql        latest  667ee8fb158e  3 days ago   521MB
+mysql        5.7.27  383867b75fd2  2 years ago  511MB
+
+
+[] How to launch a new container in docker environment
+docker ps #<-- tell list of container processes running
+docker pull nginx
+docker run -d nginx #<-- launches new instance of image as a container in bkgrnd (-d as in daemon)
+docker ps
+CONTAINER ID  IMAGE   COMMAND                     CREATED             STATUS              PORTS   NAMES
+1fd1f438dc50  nginx   "/docker-entrypoint. ..."   About a minute ago  Up About a minute   80/tcp  strange_ride
+
+[] Docker cmds:
+docker run -it nginx /bin/bash #<-- runs container in interactive mode in bash shell & puts u inside the container
+docker logs <containerID> #<-- shows logs of specific container in tail -f format
+docker inspect <containerID> #<-- to retrieve more info abt container, like IP used by container, CIDR etc
+docker stop <containerID> #<-- stops container
+docker rm <containerID> #<-- cannot directly remove a running container, gives error
+docker images
+docker rmi nginx
+#or
+docker rmi <imageID>
+
+[] Build new image:
+Dockerfile content >>
+FROM ubuntu
+MAINTAINER Jas Singh
+
+RUN apt-get update
+RUN apt-get -y install tzdata
+RUN apt-get -y install apache2
+RUN echo "Dockerfile Test on Apache2" > /var/www/html/index.html
+
+EXPOSE 80
+CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+
+cmd >>
+docker built -t imageName:latest .
+
+docker run -d imageName
+docker ps
+CONTAINER ID  IMAGE       COMMAND                     CREATED        STATUS          PORTS   NAMES
+1fd1f415dc50  imageName   "/usr/sbin/apachectl..."   16 seconds ago  Up 13 seconds   80/tcp  nice_einstein
+
+docker inspect 1fd1f415dc50 #<-- pick IP address from it n curl it
+
+[] Port Mapping:
+docker run -d -p 8080:80 imageName
+docker ps
+CONTAINER ID  IMAGE       COMMAND                     CREATED        STATUS          PORTS                                  NAMES
+1fd1f415dc50  imageName   "/usr/sbin/apachectl..."   59 seconds ago  Up 56 seconds   80/tcp                                 nice_einstein
+3a2289a57f77  imageName   "/usr/sbin/apachectl..."   16 seconds ago  Up 13 seconds   0.0.0.0:8088->80/tcp,::::8088->80/tcp  distracted_jemison
+
+This time, no need to inspect container, can use host IP:8088 to curl
+
+docker run -d -p 8188:80 imageName
+docker ps
+CONTAINER ID  IMAGE       COMMAND                     CREATED        STATUS          PORTS                                  NAMES
+1fd1f415dc50  imageName   "/usr/sbin/apachectl..."   59 seconds ago  Up 56 seconds   80/tcp                                 nice_einstein
+3a2289a57f77  imageName   "/usr/sbin/apachectl..."   16 seconds ago  Up 13 seconds   0.0.0.0:8088->80/tcp,::::8088->80/tcp  distracted_jemison
+3a2289a57f77  imageName   "/usr/sbin/apachectl..."   11 seconds ago  Up 10 seconds   0.0.0.0:8188->80/tcp,::::8188->80/tcp  idontknow_what
+
+This time, no need to inspect container, can use host IP:8188 to curl
+
+[] Container Volume Mapping:
+mkdir -p /var/lib/docker/test1
+docker run --name nginxmounted -it -v /var/lib/docker/test1:/mnt nginx /bin/bash #<-- get inside container n create new file
+# inside container
+cd /mnt
+echo "persistent storage" >> /mnt/testfile.txt
+
+now if tht container dies, the content still preserves, as original path is outside of container
+  inside container, it was mounted/pointed to outside one
+
+
+
+
+
+docker volume create volume01
+volume01
+
+docker volume ls
+DRIVER  VOLUME NAME
+local   volume01
+
+docker volume inspect volume01
+{
+  {
+    "CreatedAt": "2022-03-27T11:59:43Z",
+    "Driver": "local",
+    "Labels": {},
+    "Mountpoint": "/var/lib/docker/volumes/volume01/_data",
+    "Name": "volume01",
+    "Options": {},
+    "Scope": "local"
+  }
+}
+
+docker volume create volume02
+# map this new volume to new container >>
+docker run -v volume01:/mnt nginx
+docker run --
+name mycontainer1 -it -v volume02:/mnt nginx /bin/bash
+docker volume rm volume01 #<-- to remove volumes
+
+
+[] Docker Network:
+1. Host n/w
+2. Bridge n/w -- consists of diff. n/ws, IPs, within defined CIDR range, tht get created in docker environment,
+    with creation of containers
+
+docker network list
+NETWORK ID    NAME    DRIVER  SCOPE
+f38d220c01e8  bridge  bridge  local
+fefec5052632  host    host    local
+
+[] Manual setup of multiple containers:
+docker run alwys looks for image in local host or local registry n then goes to public registry
+
+# Linking containers wid each other using --link
+docker run -d --name=redis redis
+docker run -d --name db -e POSTGRES_HOST_AUTH_METHOD=trust postgres:9.4
+docker run -d --name=vote -p 5000:80 --link=redis:redis eesprit/voting-app-vote
+docker run -d --name=result -p 5001:80 --link=db:db eesprit/voting-app-result
+docker run -d --name=worker -p 5001:80 --link=redis:redis --link=db:db eesprit/voting-app-worker
+
+
+[] Docker compose:
+  We can build n deploy all with a single yml file inside container or docker environment
+
+Install Docker Compose:
+apt -y install docker-compose
+
+more docker-compose.yml
+version: "2"
+services:
+  vote:
+    image: eesprit/voting-app-vote
+    ports:
+      - 5000:80
+    links:
+      - redis
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+
+  worker:
+  container_name: worker
+  image: eesprit/voting-app-worker
+  links:
+    - redis
+    - db
+
+  db:
+    container_name: db
+    image: postgres:9.4
+    ports:
+      - 5001:80
+    links:
+      - db
+
+
+docker_compose up -d #<-- deploys all in 1 shot
+docker ps
+<<Add dockerps_output>>
+
+[] Docker Swarm:
+  Its a tool to handle container orchestration thru HA, scalability, replication & health monitoring
+    mgr & worker architecture
+
+  What happens wen ur host or container engine fails?
+  How ur app will continue to deliver svc?
+
+  This is whr Docker Swarm comes to play
+  It combines many docker enginer in a cluster
+
+echo -e "11.10.10.200 nodesw1\n11.10.10.205 nodesw2\n11.10.10.26 nodesw3\n11.10.10.32 nodesw4" >> /etc/hosts
+cat /etc/hosts
+
+[] Install Docker Swarm:
+# 1st install docker on each node
+apt -y install docker.io
+
+# docker swarm init --advertise-addr HOST_IP --listen-addr <CIDR range>
+docker swarm init --advertise-addr 11.10.10.139 --listen-addr 0.0.0.0  #<-- run this only on mgr node
+
+Swarm initialized: current node(jg1ssua4fdzxz0wtun1fk9gp9) is now a manager
+To add worker to this swarm, execute
+docker swarm join --token SWMTKN-1-dskjfghekljgfhsjdk-ksdjhfbjsdbh #<-- run this on all worker nodes
+To add a manager to swarm, execute
+docker swarm join-token manager
+
+ docker node ls
+ <<Add dockernodels>>
+
+[] Multi-node k8s cluster:
+echo -e "11.10.10.200 nodekb1\n11.10.10.205 nodekb2\n11.10.10.26 nodekb3\n11.10.10.32 nodekb4" >> /etc/hosts
+cat /etc/hosts
+
+apt -y install docker.io apt-transport-https
+# cgroup driver uses systemd
+
+more /etc/docker/daemon.json
+{
+  "exec-opst": ["native.cgroupdrive=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+    },
+    "storage-driver": "overlay2"
+  }
+}
+
+systemctl restart docker
+systemctl enable docker
+
+more /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+
+sysctl -- system
+# needs [iptables-legacy] for iptables backend
+# if set nftables to others, change to [iptables-legacy]
+update-alternatives -- config iptables
+
+There r 2 choice for alternative tiptables (providing /usr/sbin/iptables).
+
+Selection   Path                      Priority  Status
+-----------------------------------------------------------
+*0          /usr/sbin/iptables-legacy 20        auto mode
+ 1          /usr/sbin/iptables-legacy 20        manual mode
+ 2          /usr/sbin/iptables-nft    20        manual mode
+
+Press <enter> to keep current choice [*], or type selection number:
+
+# if swap is On, turn to Off
+swapoff -a
+vi /etc/fstab
+# comment out swap line
+
+[] Install kubeadm (to interact wid cluster), kubelet, kubectl on ALL nodes in the cluster:
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg } apt-key add -
+OK
+echo "deb http://apt.kubernetes.io/ kubernetes0xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+apt update
+apt -y install kubeadm kubelet kubectl
+
+[] Configue Master Node for install of cluster setup:
+kubeadm init --pod-network-cidr=10.244.0.0/16 --node-name controlplane -- control-plane-endpoint 11.10.10.97 #<-- IP of cluster master node
+
+# To add worker nodes, execute following on rest of worker nodes
+kubeadm join 11.10.10.49:6443 --token ksjlfdvsdd --discovery-token-ca-cert-hash sha256:35465sf65f6
+
+[] Configure Pod n/w wid Weave On Master Node
+# 1st export KUBECONFIG
+export KUBECONFIG=/etc/kubernetes/admin.conf
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version|base64|tr -d '\n')"
+serviceaccount/weave-net created
+
+[] Pod Creation:
+kubectl create deployment my-nginx01 --image=nginx
+kubectl get pods
+kubectl exec <podNAME> -- env
+kubectl logs <podNAME>
+kubectl exec -it <podNAME> -- /bin/bash #<-- to get inside the pod
+kubectl scale deployment my-nginx01 --replicas=3 #<-- scales pods
+kubectl get pods
+
+[] Access a pod using NodePort:
+NodePort svc: NodeIP permits ur pod/app to be reachable from outside the cluster
+kubectl expose deployment my-test-nginx --type="NodePort" --port 6001 --target-port 80 --dry-run="client" -o yaml > deployment.yml
+Target-port is the port on which container is supposed to listen nativelu.
+--port is the port on which u want svc/app listen on node side
+NodePort allocation usually default to 30000-32767

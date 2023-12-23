@@ -1,0 +1,12 @@
+code for tf, ansible and k8s can co-exist together in same branch in git repo
+This helps gain version control, security through Merge Requests, Traceability
+and we can setup pipelines to trigger infra deployment as well as application deployment on valid commit
+This is gitops!
+
+2 strategies:
+1. Push - with each change, pipeline gets triggered to update changes in infra
+2. Pull - ArgoCD -- an agent is setup at GitRepo to look for changes, n deploy changes to infra
+          ArgoCD makes sure that state defined in git repo is same as state in infrastructure
+          Ex: if someone makes manual changes in infa, ArgoCD will detect change in state and will revert it to align wid git repo
+
+gitops makes sure tht git is single src of truth for infrastructure

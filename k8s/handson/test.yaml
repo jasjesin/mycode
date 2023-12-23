@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  labels:
+    app: testapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testapp
+  template:                       #<-- defines template for a pod's configuration like pod label/name, container spec
+    metadata:
+      labels:
+        app: testapp
+    spec:
+      containers:
+        - name: test
+          image: mongo
+          ports:
+          - containerPort: 27017
+          env:                    #<-- specifies creation n use of env variables (to be defined below)
+          - name: MONGODB_INIT_ROOT_USERNAME
+            valueFrom:            #<-- informing where to fetch value from
+              secretKeyRef:       #<-- informing that data needs to be fetched from a secret file's key
+                name: test-secret #<-- metadata name from secret file
+                key: uid          #<-- data keyname from secret file
+          - name: MONGODB_INIT_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-secret
+                key: passwd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-svc
+spec:
+  selector:
+    app: testapp
+  ports:
+  - protocol: TCP
+    port: 27017 #<-- svc port
+    targetPort: 27017 #<-- containerPort of deployment
