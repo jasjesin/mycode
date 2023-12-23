@@ -1,0 +1,109 @@
+Ask abt API from Ritesh
+look for commands to fetch secrets from vault, take Ravi/Ram help, if needed
+
+
+
+
+How svr knows who clients is? -- thru JWT
+How clients get JWTs?
+
+access token n JWT r interchangeable names here, as other types of access tokens r not discussed
+
+To get an access token,
+  client, like a website or mobile app or Postman, has to send auth info, like UID & passwd, to API
+
+How client, gets this info, is irrelevant to us...though this is done thru Partner Onboarding
+
+Login form on a website is a way to get user auth info.
+
+client sends auth info to API --> API validates, thru DB or Vault Secrets, auth info & generates JWT,
+                                    if auth info is correct
+
+Inside JWT,
+  user's UID is stored & this is wht allows API to use JWT for authorization or SSO to other endpoints
+
+JWT is usually valid for a minute or few secs to an hour or so, depending upon what work is involved.
+    Token refreshing helps avoid user frustration, if asked too frequently, as long duration is security risk
+
+Then, JWT is sent back to client for storage, in a cookie or local storage, local DB or a file, & later use.
+
+Token refresh is mechanism tht allows us, as API, to detect, whether user logged in just now or been a while.
+  TTL
+
+flask-jwt-extension -- library that is a flask extension, which allows us to generate & validate JWTs
+
+wid change in requirements in requirements.txt, docker image needs to be re-built
+
+
+passlib -- library that can hash passwords or make them unreadable when we add them to DB.
+            helps avoid storing passwords in plaintext
+
+JWT is just an encoded string, its not a hashed string.
+    It can be decoded via jwt.io
+    Its got 3 parts:
+      header -- tells wht algorithm is used & wht type of token it is
+      payload -- tells whts stored inside the body, Like
+          fresh: informs if JWT is recently issued or old, as False or True
+          iat: issued at or when JWT was created
+          jti: JWT unique identifier
+          type: what type of token is it, example, access
+          sub: Subject, main part of JWT that tells us abt what this JWT is about or who is it for.
+                This is the user ID
+          nbf:
+          exp: expiry time
+      signature -- verify signature by typing secret key n then it displays signature verified or failed
+
+Why is subject important?
+  cuz wen user gives creds, we generate JWT for user.
+  So, this JWT is certified JWT of user that has successfully logged in.
+  So, whoever has this JWT, can then send it back to us n will b authorized to perform some actions in our app.
+  Having JWT means being able to impersonate a user, for whom JWT was created for
+  So, its vry important to keep it private n safe
+  2nd reason: wen we recv JWT, we know who this JWT belongs to.
+
+How do we prevent/protect access to specific endpoints till we recv a valid access token?
+  from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required <---
+  Add following decorator before each endpoint action/method inside the class, that needs to be protected
+    @jwt_required()
+
+to pass authorization for protected endpoint,
+  copy access token and pass it through header by defining following content-type in header
+    "Authorization": "Bearer <access_token>" <-- pretty standard word to put in front of JWT
+  Now click send again, n it will work, if access token is valid.
+
+Error Handling wid JWTs for JWT to be:
+- expired:
+- invalid: if client tries to change contents of JWT but they do not have secret key, then JWT gets invalid
+- required: JWT is required but not provided for protected endpoint
+
+These 3 functions r added underneath JWTManager, in app.py
+
+
+[] JWT claims n authorization:
+[] logout:
+  grab access token,
+    each time token is used,
+      check if it isn't present in list of terminated tokens
+  create a new file called blocklist.py, thats going to contain a set of terminated JWT tokens
+
+  put the token in blocklist wen user logs out
+    wen user logs out, tht will also send us one JWT.
+    We use that JWT to add it to blocklist, for that JWT to be checked later on in blocklist, if ever used again
+
+
+[] Token refresh: -- vry imp!!!
+    fresh n non-fresh tokens
+      fresh -- original token generated, should be allowed only for critical APIs that involve DELETE or UPDATE
+      non-fresh -- refreshed token generated, can be allowed to non-critical APIs like GET
+
+get_jwt_identity is a shortcut to get JWT n then subject
+refresh token is the one that only client is going to use, wen using refresh endpoint
+evry 30 mins, wen access token expires,
+  client will get a new one, using refresh endpoint, i.e.,
+    refresh token is generated, without telling the user
+This keeps happening till user tries to perform a DELETE or UPDATE or any destructive operation
+  For this, user will be asked to re-login to generate fresh token
+
+wen does refresh token expire?
+  we can set expiry time of refresh token n we can add refresh tokens to blocklist
+  

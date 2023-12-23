@@ -1,0 +1,110 @@
+Helm -- pkg mgr
+
+k8s -- doesn't knows our app as a whole, it just takes care of individual components of our app
+helm -- built frm ground up, knows our app as a whole.
+        we just need to specify app name n helm can find associated components of the app.
+
+Ex: game application or any app contains 100s of files, we do not d/l each file separately
+    we d/l exe/dmg file n click on install..then installer makes sure to load each file at appropriate path
+
+helm does same wid all yaml files & k8s objects, tht make up our app
+
+single cmd to install entire app, even if it needs 100s of objects, like
+helm install wordpress
+helm adds each necessary obj to k8s, without bothering us wid details
+
+we can customize values for app/pkg by specifying desired values at install time
+instead of touching multiple yaml files, we hv single location to declare each custom setting in a file called values.yaml
+values.yaml -- we can change size of pv, name of website, admin password settings for DB engine etc
+
+we can upgrade our app wid single cmd
+helm upgrade wordpress
+helm will know wht individual objects need to change
+
+helm keeps track of all changes made to app files n tht allows us to rollback to previous/working version
+helm rollback wordpress
+
+single cmd to uninstall app
+helm uninstall wordpress
+help keeps track of all the objects used by each app, so it knows wht to remove
+
+helm works as
+- pkg mgr to install/uninstall app
+- release mgs to upgrade or rollback app versions
+
+look for helm charts in open src repo called artifacthub.io
+
+jasdil@JasDiLMacAir helm % kubectl get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   23d
+
+jasdil@JasDiLMacAir helm % $helm install myrelease bitnami/wordpress
+NAME: myrelease
+LAST DEPLOYED: Wed Jan 18 23:07:41 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: wordpress
+CHART VERSION: 15.2.31
+APP VERSION: 6.1.1
+
+** Please be patient while the chart is being deployed **
+
+Your WordPress site can be accessed through the following DNS name from within your cluster:
+
+    myrelease-wordpress.default.svc.cluster.local (port 80)
+
+To access your WordPress site from outside the cluster follow the steps below:
+
+1. Get the WordPress URL by running these commands:
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        Watch the status with: 'kubectl get svc --namespace default -w myrelease-wordpress'
+
+   export SERVICE_IP=$(kubectl get svc --namespace default myrelease-wordpress --include "{{ range (index .status.loadBalancer.ingress 0) }}{{ . }}{{ end }}")
+   echo "WordPress URL: http://$SERVICE_IP/"
+   echo "WordPress Admin URL: http://$SERVICE_IP/admin"
+
+2. Open a browser and access WordPress using the obtained URL.
+
+3. Login with the following credentials below to see your blog:
+
+  echo Username: user
+  echo Password: $(kubectl get secret --namespace default myrelease-wordpress -o jsonpath="{.data.wordpress-password}" | base64 -d)
+jasdil@JasDiLMacAir helm %
+
+jasdil@JasDiLMacAir helm % $helm list
+NAME     	NAMESPACE	REVISION	UPDATED                            	STATUS  	CHART            	APP VERSION
+myrelease	default  	1       	2023-01-18 23:07:41.91642 -0800 PST	deployed	wordpress-15.2.31	6.1.1
+jasdil@JasDiLMacAir helm %
+
+jasdil@JasDiLMacAir helm % kubectl get all
+NAME                                      READY   STATUS              RESTARTS   AGE
+pod/myrelease-mariadb-0                   0/1     ContainerCreating   0          2m3s
+pod/myrelease-wordpress-5d6b556c7-bhkcj   0/1     ContainerCreating   0          2m4s
+
+NAME                          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/kubernetes            ClusterIP      10.96.0.1       <none>        443/TCP                      23d
+service/myrelease-mariadb     ClusterIP      10.100.52.163   <none>        3306/TCP                     2m9s
+service/myrelease-wordpress   LoadBalancer   10.98.142.193   localhost     80:30579/TCP,443:30507/TCP   2m9s
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/myrelease-wordpress   0/1     1            0           2m6s
+
+NAME                                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/myrelease-wordpress-5d6b556c7   1         1         0       2m5s
+
+NAME                                 READY   AGE
+statefulset.apps/myrelease-mariadb   0/1     2m5s
+jasdil@JasDiLMacAir helm %
+
+helm repo can b used to add, list, delete or update help repos
+
+jasdil@JasDiLMacAir helm % $helm repo list
+NAME   	URL
+bitnami	https://charts.bitnami.com/bitnami
+jasdil@JasDiLMacAir helm %
+
+helm repo update -- updates repo with latest changes by syncing local changes wid latest changes available at open src repo

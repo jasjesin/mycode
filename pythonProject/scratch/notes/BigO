@@ -1,0 +1,18 @@
+What is a Good Code?
+- Readable -- how clean is it, can others understand your code?
+- Scalable -- how efficiently can it execute for large amount of data?
+
+BigO notation is what allows us to measure this idea of scalable code
+BigO notation is the language we use to see how long an algorithm takes to run
+  We can compare it to diff. algorithms, using BigO, and compute which one is better, regardless of computer resources.
+
+As same program can provide diff. execution on diff. computers, based on speed n perf of computers;
+  so, we compute BigO in terms of no. of operations performed by the program
+
+
+
+
+runtime -- how long does it take for a specific problem to run thru a fn or a task
+  How to measure BigO or measure performance or efficiency of this code?
+
+As input data grows, the fn grows slower n slower
