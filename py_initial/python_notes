@@ -1,0 +1,1654 @@
+Why Python
+  OOP language -- whr we hv objects to stand for data, whr data can b changed
+                  for obj to work in specified way. This helps code reuse
+  interpretor language, no compiler needed; code executed immediately
+  high lvl lang, syntax similar to english
+  portable, code in fewer lines
+works on diff. platforms
+libraries -- reusable code
+  library is a collection of related modules, while a module is a single file containing Python code.
+    Packages are a collection of related modules that aim to achieve a common goal.
+    library is a collection of packages and modules that can be used to access built-in functionality.
+
+
+script, module, pkg & library
+  Script contains function definition as well as invocation of that function that returns some output
+    A script is a Python file that’s intended to be run directly.
+    When you run it, it should do something.
+    This means that scripts will often contain code written outside the scope of any classes or functions.
+  module contains python commands in logical order, or definition of a function, that doesnt gives any output
+    We can import such modules that have classes, variables, classes, functions & other members defined.
+    A module is a Python file that’s intended to be imported into scripts or other modules.
+    It often defines members like classes, functions, and variables intended to be used in other files that import it.
+
+A package is a collection of related modules that work together to provide certain functionality.
+These modules are contained within a folder and can be imported just like any other modules.
+This folder will often contain a special __init__ file that tells Python it’s a package,
+  potentially containing more modules nested within subfolders
+
+A library is an umbrella term that loosely means “a bundle of code.”
+  These can have tens or even hundreds of individual modules that can provide a wide range of functionality.
+  Matplotlib is a plotting library.
+  The Python Standard Library contains hundreds of modules for performing common tasks,
+    like sending emails or reading JSON data.
+  What’s special about the Standard Library is that it comes bundled with your installation of Python,
+    so you can use its modules without having to download them from anywhere.
+
+
+Python interpretor is an executable file, located somewhere on the system
+
+
+
+Python can b used for
+  web n s/w dev, machine learing (ML)
+  AI, a?v apps for gaming, n/w program, GUI apps  complex algos
+
+versatile lang.
+
+pip -- Python's pkg mgr to download/install open-src pkgs, with __init__.py file n use them in modules(also called as files)
+
+Diff b/w Set & lists:
+  Set uses hash function to find an element whereas list is an array. Hence finding element in Set is faster than in list .
+  sets, unlike lists or tuples, cannot have multiple occurrences of the same element and store unordered values.
+
+Strings r arrays
+    a = "Hello, World!"
+    print(a[1])
+
+Check String
+  To check if a certain phrase or character is present in a string, we can use the keyword in.
+      txt = "The best things in life are free!"
+      print("free" in txt)
+      if "free" in txt:
+        print("Yes, 'free' is present.")
+
+      print("expensive" not in txt)
+      if "expensive" not in txt:
+        print("No, 'expensive' is NOT present.")
+
+Slice From the Start
+  By leaving out the start index, the range will start at the first character:
+  b = "Hello, World!"
+  print(b[:5])
+
+Slice To the End
+  By leaving out the end index, the range will go to the end:
+  b = "Hello, World!"
+  print(b[2:])
+
+Negative Indexing
+  Use negative indexes to start the slice from the end of the string:
+  b = "Hello, World!"
+  print(b[-5:-2])
+
+we can combine strings and numbers by using the format() method!
+  The format() method takes the passed arguments, formats them, and places them in the string where the placeholders {} are:
+  age = 36
+  txt = "My name is John, and I am {}"
+  print(txt.format(age))
+
+  The format() method takes unlimited number of arguments, and are placed into the respective placeholders:
+  quantity = 3
+  itemno = 567
+  price = 49.95
+  myorder = "I want {} pieces of item {} for {} dollars."
+  print(myorder.format(quantity, itemno, price))
+
+  You can use index numbers {0} to be sure the arguments are placed in the correct placeholders:
+  quantity = 3
+  itemno = 567
+  price = 49.95
+  myorder = "I want to pay {2} dollars for {0} pieces of item {1}."
+  print(myorder.format(quantity, itemno, price))
+
+  Escape Characters
+  Other escape characters used in Python:
+
+  Code	Result	Try it
+  \'	Single Quote
+  \\	Backslash
+  \n	New Line
+  \r	Carriage Return
+  \t	Tab
+  \b	Backspace
+  \f	Form Feed
+  \ooo	Octal value
+  \xhh	Hex value
+
+
+  Method	Description
+  capitalize()	Converts the first character to upper case
+  casefold()	Converts string into lower case
+  center()	Returns a centered string
+  count()	Returns the number of times a specified value occurs in a string
+  encode()	Returns an encoded version of the string
+  endswith()	Returns true if the string ends with the specified value
+  expandtabs()	Sets the tab size of the string
+  find()	Searches the string for a specified value and returns the position of where it was found
+  format()	Formats specified values in a string
+  format_map()	Formats specified values in a string
+  index()	Searches the string for a specified value and returns the position of where it was found
+  isalnum()	Returns True if all characters in the string are alphanumeric
+  isalpha()	Returns True if all characters in the string are in the alphabet
+  isascii()	Returns True if all characters in the string are ascii characters
+  isdecimal()	Returns True if all characters in the string are decimals
+  isdigit()	Returns True if all characters in the string are digits
+  isidentifier()	Returns True if the string is an identifier
+  islower()	Returns True if all characters in the string are lower case
+  isnumeric()	Returns True if all characters in the string are numeric
+  isprintable()	Returns True if all characters in the string are printable
+  isspace()	Returns True if all characters in the string are whitespaces
+  istitle()	Returns True if the string follows the rules of a title
+  isupper()	Returns True if all characters in the string are upper case
+  join()	Converts the elements of an iterable into a string
+  ljust()	Returns a left justified version of the string
+  lower()	Converts a string into lower case
+  lstrip()	Returns a left trim version of the string
+  maketrans()	Returns a translation table to be used in translations
+  partition()	Returns a tuple where the string is parted into three parts
+  replace()	Returns a string where a specified value is replaced with a specified value
+  rfind()	Searches the string for a specified value and returns the last position of where it was found
+  rindex()	Searches the string for a specified value and returns the last position of where it was found
+  rjust()	Returns a right justified version of the string
+  rpartition()	Returns a tuple where the string is parted into three parts
+  rsplit()	Splits the string at the specified separator, and returns a list
+  rstrip()	Returns a right trim version of the string
+  split()	Splits the string at the specified separator, and returns a list
+  splitlines()	Splits the string at line breaks and returns a list
+  startswith()	Returns true if the string starts with the specified value
+  strip()	Returns a trimmed version of the string
+  swapcase()	Swaps cases, lower case becomes upper case and vice versa
+  title()	Converts the first character of each word to upper case
+  translate()	Returns a translated string
+  upper()	Converts a string into upper case
+  zfill()	Fills the string with a specified number of 0 values at the beginning
+
+Bool --
+The following will return False, rest all mostly return true:
+bool(False)
+bool(None)
+bool(0)
+bool("")
+bool(())
+bool([])
+bool({})
+
+One more value, or object in this case, evaluates to False, and that is if you have an object that is made from a class with a __len__ function that returns 0 or False:
+class myclass():
+  def __len__(self):
+    return 0
+
+myobj = myclass()
+print(bool(myobj))
+
+https://www.w3schools.com/python/python_operators.asp
+
+It is also possible to use the list() constructor when creating a new list.
+
+Example
+Using the list() constructor to make a List:
+
+thislist = list(("apple", "banana", "cherry")) # note the double round-brackets
+print(thislist)
+
+list() is a built-in class in Python
+The list() constructor returns a list. If no parameters are passed, it returns an empty list. If iterable is passed as a parameter, it creates a list consisting of iterable's items.
+Constructors are a special type of method used to initialize an object. Constructors are responsible for assigning values to the data members of a class when an object is created.
+
+List is a collection which is ordered and changeable. Allows duplicate members.
+Tuple is a collection which is ordered and unchangeable. Allows duplicate members.
+Set is a collection which is unordered, unchangeable*, and unindexed. No duplicate members.
+Dictionary is a collection which is ordered** and changeable. No duplicate members.
+
+*Set items are unchangeable, but you can remove and/or add items whenever you like.
+
+**As of Python version 3.7, dictionaries are ordered. In Python 3.6 and earlier, dictionaries are unordered.
+
+print(a[2:4])
+print(a[-2:-4])
+
+
+Insert Items
+To insert a new list item, without replacing any of the existing values, we can use the insert() method.
+
+The insert() method inserts an item at the specified index:
+
+Example
+Insert "watermelon" as the third item:
+
+thislist = ["apple", "banana", "cherry"]
+thislist.insert(2, "watermelon")
+print(thislist)
+
+
+Check if Item Exists
+To determine if a specified item is present in a list use the in keyword:
+
+Example
+Check if "apple" is present in the list:
+
+thislist = ["apple", "banana", "cherry"]
+if "apple" in thislist:
+  print("Yes, 'apple' is in the fruits list")
+
+  Append Items
+  To add an item to the end of the list, use the append() method:
+
+  Example
+  Using the append() method to append an item:
+
+  thislist = ["apple", "banana", "cherry"]
+  thislist.append("orange")
+  print(thislist)
+
+  Extend List
+  To append elements from another list to the current list, use the extend() method.
+
+  Example
+  Add the elements of tropical to thislist:
+
+  thislist = ["apple", "banana", "cherry"]
+  tropical = ["mango", "pineapple", "papaya"]
+  thislist.extend(tropical)
+  print(thislist)
+
+In python del is a keyword and remove(), pop() are in-built methods.
+The purpose of these three are same but the behavior is different
+remove() method delete values or object from the list using value and
+del and pop() deletes values or object from the list using an index.
+
+Loop Through the Index Numbers
+You can also loop through the list items by referring to their index number.
+
+Use the range() and len() functions to create a suitable iterable.
+
+Example
+Print all items by referring to their index number:
+
+thislist = ["apple", "banana", "cherry"]
+for i in range(len(thislist)):
+  print(thislist[i])
+
+  Looping Using List Comprehension
+  List Comprehension offers the shortest syntax for looping through lists:
+
+  Example
+  A short hand for loop that will print all items in a list:
+
+  thislist = ["apple", "banana", "cherry"]
+  [print(x) for x in thislist]
+
+  List Comprehension
+  List comprehension offers a shorter syntax when you want to create a new list based on the values of an existing list.
+
+  Example:
+
+  Based on a list of fruits, you want a new list, containing only the fruits with the letter "a" in the name.
+
+  Without list comprehension you will have to write a for statement with a conditional test inside:
+
+  Example
+  fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+  newlist = []
+
+  for x in fruits:
+    if "a" in x:
+      newlist.append(x)
+
+  print(newlist)
+
+  With list comprehension you can do all that with only one line of code:
+
+  Example
+  fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+
+  newlist = [x for x in fruits if "a" in x]
+
+  print(newlist)
+
+  The Syntax
+  newlist = [expression for item in iterable if condition == True]
+  The return value is a new list, leaving the old list unchanged.
+
+  Condition
+  The condition is like a filter that only accepts the items that valuate to True.
+
+  Example
+  Only accept items that are not "apple":
+
+  newlist = [x for x in fruits if x != "apple"]
+
+  The condition if x != "apple"  will return True for all elements other than "apple",
+  making the new list contain all fruits except "apple".
+
+  Iterable
+The iterable can be any iterable object, like a list, tuple, set etc.
+
+Example
+You can use the range() function to create an iterable:
+
+newlist = [x for x in range(10)]
+Same example, but with a condition:
+
+Example
+Accept only numbers lower than 5:
+
+newlist = [x for x in range(10) if x < 5]
+
+The expression can also contain conditions, not like a filter, but as a way to manipulate the outcome:
+
+Example
+Return "orange" instead of "banana":
+
+newlist = [x if x != "banana" else "orange" for x in fruits]
+The expression in the example above says:
+
+"Return the item if it is not banana, if it is banana return orange".
+
+Sort List Alphanumerically
+List objects have a sort() method that will sort the list alphanumerically, ascending, by default:
+
+Example
+Sort the list alphabetically:
+
+thislist = ["orange", "mango", "kiwi", "pineapple", "banana"]
+thislist.sort()
+print(thislist)
+
+Sort Descending
+To sort descending, use the keyword argument reverse = True:
+
+Example
+Sort the list descending:
+
+thislist = ["orange", "mango", "kiwi", "pineapple", "banana"]
+thislist.sort(reverse = True)
+print(thislist)
+
+Customize Sort Function
+You can also customize your own function by using the keyword argument key = function.
+
+The function will return a number that will be used to sort the list (the lowest number first):
+
+Example
+Sort the list based on how close the number is to 50:
+
+def myfunc(n):
+  return abs(n - 50)
+
+thislist = [100, 50, 65, 82, 23]
+thislist.sort(key = myfunc)
+print(thislist)
+
+Case Insensitive Sort
+By default the sort() method is case sensitive, resulting in all capital letters being sorted before lower case letters:
+
+Example
+Case sensitive sorting can give an unexpected result:
+
+thislist = ["banana", "Orange", "Kiwi", "cherry"]
+thislist.sort()
+print(thislist)
+Luckily we can use built-in functions as key functions when sorting a list.
+
+So if you want a case-insensitive sort function, use str.lower as a key function:
+
+Example
+Perform a case-insensitive sort of the list:
+
+thislist = ["banana", "Orange", "Kiwi", "cherry"]
+thislist.sort(key = str.lower)
+print(thislist)
+
+
+Reverse Order
+What if you want to reverse the order of a list, regardless of the alphabet?
+
+The reverse() method reverses the current sorting order of the elements.
+
+Example
+Reverse the order of the list items:
+
+thislist = ["banana", "Orange", "Kiwi", "cherry"]
+thislist.reverse()
+print(thislist)
+
+Copy a List
+You cannot copy a list simply by typing list2 = list1, because: list2 will only be a reference to list1, and changes made in list1 will automatically also be made in list2.
+
+There are ways to make a copy, one way is to use the built-in List method copy().
+
+Example
+Make a copy of a list with the copy() method:
+
+thislist = ["apple", "banana", "cherry"]
+mylist = thislist.copy()
+print(mylist)
+
+https://www.w3schools.com/python/python_lists_methods.asp
+
+Create Tuple With One Item
+To create a tuple with only one item, you have to add a comma after the item, otherwise Python will not recognize it as a tuple.
+
+Example
+One item tuple, remember the comma:
+
+thistuple = ("apple",)
+print(type(thistuple))
+
+#NOT a tuple
+thistuple = ("apple")
+print(type(thistuple))
+
+Change Tuple Values
+Once a tuple is created, you cannot change its values. Tuples are unchangeable, or immutable as it also is called.
+
+But there is a workaround. You can convert the tuple into a list, change the list, and convert the list back into a tuple.
+
+Example
+Convert the tuple into a list to be able to change it:
+
+x = ("apple", "banana", "cherry")
+y = list(x)
+y[1] = "kiwi"
+x = tuple(y)
+
+print(x)
+
+Using Asterisk*
+If the number of variables is less than the number of values, you can add an * to the variable name and the values will be assigned to the variable as a list:
+
+Example
+Assign the rest of the values as a list called "red":
+
+fruits = ("apple", "banana", "cherry", "strawberry", "raspberry")
+
+(green, yellow, *red) = fruits
+
+print(green)
+print(yellow)
+print(red)
+
+If the asterisk is added to another variable name than the last, Python will assign values to the variable until the number of values left matches the number of variables left.
+
+Example
+Add a list of values the "tropic" variable:
+
+fruits = ("apple", "mango", "papaya", "pineapple", "cherry")
+
+(green, *tropic, red) = fruits
+
+print(green)
+print(tropic)
+print(red)
+
+Set
+Sets are used to store multiple items in a single variable.
+A set is a collection which is unordered, unchangeable*, and unindexed.
+* Note: Set items are unchangeable, but you can remove items and add new items.
+Sets are written with curly brackets.
+
+Add Sets
+To add items from another set into the current set, use the update() method.
+
+Example
+Add elements from tropical into thisset:
+
+thisset = {"apple", "banana", "cherry"}
+tropical = {"pineapple", "mango", "papaya"}
+
+thisset.update(tropical)
+
+print(thisset)
+
+Add Any Iterable
+The object in the update() method does not have to be a set, it can be any iterable object (tuples, lists, dictionaries etc.).
+
+Example
+Add elements of a list to at set:
+
+thisset = {"apple", "banana", "cherry"}
+mylist = ["kiwi", "orange"]
+
+thisset.update(mylist)
+
+print(thisset)
+
+Difference between remove() n discard() in
+setA.remove("abc")   <-- raises an error if specified item doesn't exists
+setA.discard("abc")  <-- DOES NOT raise an error if specified item doesn't exists
+
+
+You can use the union() method that returns a new set containing all items from both sets, or the update() method that inserts all the items from one set into another:
+
+Example
+The union() method returns a new set with all items from both sets:
+
+set1 = {"a", "b" , "c"}
+set2 = {1, 2, 3}
+
+set3 = set1.union(set2)
+print(set3)
+
+update() adds elements of another set to the existing set.
+union() creates a new set
+
+
+Keep ONLY the Duplicates
+The intersection_update() method will keep only the items that are present in both sets.
+
+Example
+Keep the items that exist/common in both set x, and set y:
+
+x = {"apple", "banana", "cherry"}
+y = {"google", "microsoft", "apple"}
+
+x.intersection_update(y)
+
+print(x)
+
+
+The intersection() method will return a new set, that only contains the items that are present in both sets.
+
+Example
+Return a set that contains the items that exist in both set x, and set y:
+
+x = {"apple", "banana", "cherry"}
+y = {"google", "microsoft", "apple"}
+
+z = x.intersection(y)
+
+print(z)
+
+
+Keep All, But NOT the Duplicates
+The symmetric_difference_update() method will keep only the elements that are NOT present in both sets.
+
+Example
+Keep the items that are not present in both sets:
+
+x = {"apple", "banana", "cherry"}
+y = {"google", "microsoft", "apple"}
+
+x.symmetric_difference_update(y)
+
+print(x)
+
+The symmetric_difference() method will return a new set, that contains only the elements that are NOT present in both sets.
+
+Example
+Return a set that contains all items from both sets, except items that are present in both:
+
+x = {"apple", "banana", "cherry"}
+y = {"google", "microsoft", "apple"}
+
+z = x.symmetric_difference(y)
+
+print(z)
+
+https://www.w3schools.com/python/python_sets_methods.asp
+
+Dictionary
+Dictionaries are used to store data values in key:value pairs.
+
+A dictionary is a collection which is ordered*, changeable and do not allow duplicates.
+
+As of Python version 3.7, dictionaries are ordered. In Python 3.6 and earlier, dictionaries are unordered.
+
+Dictionaries are written with curly brackets, and have keys and values:
+
+ordered --> items can be access using indexed numbers
+
+The dict() Constructor
+It is also possible to use the dict() constructor to make a dictionary.
+
+Example
+Using the dict() method to make a dictionary:
+
+thisdict = dict(name = "John", age = 36, country = "Norway")
+print(thisdict)
+
+There is also a method called get() that will give you the same result:
+
+Example
+Get the value of the "model" key:
+
+x = thisdict.get("model")
+
+Get Items
+The items() method will return each item in a dictionary, as tuples in a list.
+
+Example
+Get a list of the key:value pairs
+
+x = thisdict.items()
+
+The returned list is a view of the items of the dictionary, meaning that any changes done to the dictionary will be reflected in the items list.
+
+Example
+Make a change in the original dictionary, and see that the items list gets updated as well:
+
+car = {
+"brand": "Ford",
+"model": "Mustang",
+"year": 1964
+}
+
+x = car.items()
+
+print(x) #before the change
+
+car["year"] = 2020
+
+print(x) #after the change
+
+Check if Key Exists
+To determine if a specified key is present in a dictionary use the in keyword:
+
+Example
+Check if "model" is present in the dictionary:
+
+thisdict = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+if "model" in thisdict:
+  print("Yes, 'model' is one of the keys in the thisdict dictionary")
+
+  Update Dictionary
+The update() method will update the dictionary with the items from the given argument.
+
+The argument must be a dictionary, or an iterable object with key:value pairs.
+
+Example
+Update the "year" of the car by using the update() method:
+
+thisdict = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+thisdict.update({"year": 2020})
+
+Removing Items
+There are several methods to remove items from a dictionary:
+
+Example
+The pop() method removes the item with the specified key name:
+
+thisdict = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+thisdict.pop("model")
+print(thisdict)
+
+Example
+The popitem() method removes the last inserted item (in versions before 3.7, a random item is removed instead):
+
+thisdict = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+thisdict.popitem()
+print(thisdict)
+
+The del keyword removes the item with the specified key name:
+
+thisdict = {
+  "brand": "Ford",
+  "model": "Mustang",
+  "year": 1964
+}
+del thisdict["model"]
+print(thisdict)
+
+
+Example
+Loop through both keys and values, by using the items() method:
+
+for x, y in thisdict.items():
+  print(x, y)
+
+  Copy a Dictionary
+  You cannot copy a dictionary simply by typing dict2 = dict1, because: dict2 will only be a reference to dict1, and changes made in dict1 will automatically also be made in dict2.
+
+  There are ways to make a copy, one way is to use the built-in Dictionary method copy().
+
+  Example
+  Make a copy of a dictionary with the copy() method:
+
+  thisdict = {
+    "brand": "Ford",
+    "model": "Mustang",
+    "year": 1964
+  }
+  mydict = thisdict.copy()
+  print(mydict)
+
+  Nested Dictionaries
+A dictionary can contain dictionaries, this is called nested dictionaries.
+
+Example
+Create a dictionary that contain three dictionaries:
+
+myfamily = {
+  "child1" : {
+    "name" : "Emil",
+    "year" : 2004
+  },
+  "child2" : {
+    "name" : "Tobias",
+    "year" : 2007
+  },
+  "child3" : {
+    "name" : "Linus",
+    "year" : 2011
+  }
+}
+
+
+Example
+Create three dictionaries, then create one dictionary that will contain the other three dictionaries:
+
+child1 = {
+  "name" : "Emil",
+  "year" : 2004
+}
+child2 = {
+  "name" : "Tobias",
+  "year" : 2007
+}
+child3 = {
+  "name" : "Linus",
+  "year" : 2011
+}
+
+myfamily = {
+  "child1" : child1,
+  "child2" : child2,
+  "child3" : child3
+}
+
+https://www.w3schools.com/python/python_dictionaries_methods.asp
+
+break vs continue
+  break -- to break out of the loop
+  continue -- to ignore current iteration in loop n move on to next iteration
+
+  Else in For Loop
+  The else keyword in a for loop specifies a block of code to be executed when the loop is finished:
+
+  Example
+  Print all numbers from 0 to 5, and print a message when the loop has ended:
+
+  for x in range(6):
+    print(x)
+  else:
+    print("Finally finished!")
+
+Note: The else block will NOT be executed if the loop is stopped by a break statement.
+
+Python Functions
+A function is a block of code which only runs when it is called.
+You can pass data, known as parameters, into a function.
+A function can return data as a result.
+
+Parameters or Arguments?
+The terms parameter and argument can be used for the same thing: information that are passed into a function.
+From a function's perspective:
+A parameter is the variable listed inside the parentheses in the function definition.
+An argument is the value that is sent to the function when it is called.
+
+Arbitrary Arguments, *args
+If you do not know how many arguments that will be passed into your function, add a * before the parameter name in the function definition.
+This way the function will receive a tuple of arguments, and can access the items accordingly:
+Arbitrary Arguments are often shortened to *args in Python documentations.
+
+Example
+If the number of arguments is unknown, add a * before the parameter name:
+def my_function(*kids):
+  print("The youngest child is " + kids[2])
+
+my_function("Emil", "Tobias", "Linus")
+
+
+Keyword Arguments
+You can also send arguments with the key = value syntax.
+This way the order of the arguments does not matter.
+
+Example
+def my_function(child3, child2, child1):
+  print("The youngest child is " + child3)
+
+my_function(child1 = "Emil", child2 = "Tobias", child3 = "Linus")
+
+The phrase Keyword Arguments are often shortened to kwargs in Python documentations.
+
+
+Arbitrary Keyword Arguments, **kwargs
+If you do not know how many keyword arguments that will be passed into your function, add two asterisk: ** before the parameter name in the function definition.
+This way the function will receive a dictionary of arguments, and can access the items accordingly:
+
+Example
+If the number of keyword arguments is unknown, add a double ** before the parameter name:
+
+def my_function(**kid):
+  print("His last name is " + kid["lname"])
+
+my_function(fname = "Tobias", lname = "Refsnes")
+
+Arbitrary Kword Arguments are often shortened to **kwargs in Python documentations.
+
+Default Parameter Value
+The following example shows how to use a default parameter value.
+If we call the function without argument, it uses the default value:
+
+Example
+def my_function(country = "Norway"):
+  print("I am from " + country)
+
+my_function("Sweden")
+my_function("India")
+my_function()  <-- Norway
+my_function("Brazil")
+
+
+Passing a List as an Argument
+You can send any data types of argument to a function (string, number, list, dictionary etc.), and it will be treated as the same data type inside the function.
+E.g. if you send a List as an argument, it will still be a List when it reaches the function:
+
+Example
+def my_function(food):
+  for x in food:
+    print(x)
+
+fruits = ["apple", "banana", "cherry"]
+my_function(fruits)
+
+Recursion
+Python also accepts function recursion, which means a defined function can call itself.
+Recursion is a common mathematical and programming concept. It means that a function calls itself. This has the benefit of meaning that you can loop through data to reach a result.
+The developer should be very careful with recursion as it can be quite easy to slip into writing a function which never terminates, or one that uses excess amounts of memory or processor power. However, when written correctly recursion can be a very efficient and mathematically-elegant approach to programming.
+In this example, tri_recursion() is a function that we have defined to call itself ("recurse"). We use the k variable as the data, which decrements (-1) every time we recurse. The recursion ends when the condition is not greater than 0 (i.e. when it is 0).
+To a new developer it can take some time to work out how exactly this works, best way to find out is by testing and modifying it.
+Example
+Recursion Example
+
+def tri_recursion(k):
+  if(k > 0):
+    result = k + tri_recursion(k - 1)
+    print(result)
+  else:
+    result = 0
+  return result
+
+print("\n\nRecursion Example Results")
+tri_recursion(6)
+
+
+Python Lambda
+A lambda function is a small anonymous function.
+A lambda function can take any number of arguments, but can only have one expression.
+
+Syntax
+lambda arguments : expression
+The expression is executed and the result is returned:
+Example
+Add 10 to argument a, and return the result:
+
+x = lambda a : a + 10
+print(x(5))
+
+Why Use Lambda Functions?
+The power of lambda is better shown when you use them as an anonymous function inside another function.
+
+Say you have a function definition that takes one argument, and that argument will be multiplied with an unknown number:
+
+def myfunc(n):
+  return lambda a : a * n
+Use that function definition to make a function that always doubles the number you send in:
+
+Example
+def myfunc(n):
+  return lambda a : a * n
+
+mydoubler = myfunc(2)
+
+print(mydoubler(11))
+Or, use the same function definition to make a function that always triples the number you send in:
+
+Example
+def myfunc(n):
+  return lambda a : a * n
+
+mytripler = myfunc(3)
+
+print(mytripler(11))
+Or, use the same function definition to make both functions, in the same program:
+
+Example
+def myfunc(n):
+  return lambda a : a * n
+
+mydoubler = myfunc(2)
+mytripler = myfunc(3)
+
+print(mydoubler(11))
+print(mytripler(11))
+Use lambda functions when an anonymous function is required for a short period of time.
+
+Python Arrays
+Note: Python does not have built-in support for Arrays, but Python Lists can be used instead.
+
+Arrays
+Note: This page shows you how to use LISTS as ARRAYS, however, to work with arrays in Python you will have to import a library, like the NumPy library.
+
+Arrays are used to store multiple values in one single variable:
+
+Example
+Create an array containing car names:
+
+cars = ["Ford", "Volvo", "BMW"]
+
+What is an Array?
+An array is a special variable, which can hold more than one value at a time.
+
+If you have a list of items (a list of car names, for example), storing the cars in single variables could look like this:
+
+car1 = "Ford"
+car2 = "Volvo"
+car3 = "BMW"
+
+However, what if you want to loop through the cars and find a specific one? And what if you had not 3 cars, but 300?
+The solution is an array!
+
+An array can hold many values under a single name, and you can access the values by referring to an index number.
+An array is faster than a list in python since all the elements stored in an array are homogeneous i.e., they have the same data type whereas a list contains heterogeneous elements.
+List is used to collect items that usually consist of elements of multiple data types. An array is also a vital component that collects several items of the same data type. List cannot manage arithmetic operations. Array can manage arithmetic operations.
+
+Python Classes/Objects
+Python is an object oriented programming language.
+Almost everything in Python is an object, with its properties and methods.
+A Class is like an object constructor, or a "blueprint" for creating objects.
+Note: The self parameter is a reference to the current instance of the class, and is used to access variables that belong to the class.
+
+The __init__() Function
+All classes have a function called __init__(), which is always executed when the
+class is being initiated.
+Use the __init__() function to assign values to object properties, or other operations
+that are necessary to do when the object is being created:
+Note: The __init__() function is called automatically every time the class is being used to create a new object.
+Example
+Create a class named Person, use the __init__() function to assign values for name and age:
+
+class Person:
+  def __init__(self, name, age):
+    self.name = name
+    self.age = age
+
+p1 = Person("John", 36)
+print(p1.name)
+print(p1.age)
+
+The __str__() Function
+The __str__() function controls what should be returned when the class object is
+represented as a string.
+
+If the __str__() function is not set, the string representation of the object is returned:
+Example
+The string representation of an object WITHOUT the __str__() function:
+
+class Person:
+  def __init__(self, name, age):
+    self.name = name
+    self.age = age
+
+p1 = Person("John", 36)
+print(p1)
+
+Example
+The string representation of an object WITH the __str__() function:
+
+class Person:
+  def __init__(self, name, age):
+    self.name = name
+    self.age = age
+
+  def __str__(self):
+    return f"{self.name}({self.age})"
+
+p1 = Person("John", 36)
+print(p1)
+
+The self Parameter
+The self parameter is a reference to the current instance of the class, and is used to access variables that belongs to the class.
+
+It does not have to be named self , you can call it whatever you like, but it has to be the first parameter of any function in the class:
+
+Example
+Use the words mysillyobject and abc instead of self:
+
+class Person:
+  def __init__(mysillyobject, name, age):
+    mysillyobject.name = name
+    mysillyobject.age = age
+
+  def myfunc(abc):
+    print("Hello my name is " + abc.name)
+
+p1 = Person("John", 36)
+p1.myfunc()
+
+Modify Object Properties
+You can modify properties on objects like this:
+Example
+Set the age of p1 to 40:
+
+p1.age = 40
+
+Delete Object Properties
+You can delete properties on objects by using the del keyword:
+Example
+Delete the age property from the p1 object:
+
+del p1.age
+
+Delete Objects
+You can delete objects by using the del keyword:
+Example
+Delete the p1 object:
+
+del p1
+The pass Statement
+class definitions cannot be empty, but if you for some reason have a class definition with no content, put in the pass statement to avoid getting an error.
+Example
+class Person:
+  pass
+
+  Python Inheritance
+  Inheritance allows us to define a class that inherits all the methods and properties from another class.
+
+  Parent class is the class being inherited from, also called base class.
+
+  Child class is the class that inherits from another class, also called derived class.
+
+  Create a Parent Class
+  Any class can be a parent class, so the syntax is the same as creating any other class:
+
+  Example
+  Create a class named Person, with firstname and lastname properties, and a printname method:
+
+  class Person:
+    def __init__(self, fname, lname):
+      self.firstname = fname
+      self.lastname = lname
+
+    def printname(self):
+      print(self.firstname, self.lastname)
+
+  #Use the Person class to create an object, and then execute the printname method:
+
+  x = Person("John", "Doe")
+  x.printname()
+  Create a Child Class
+  To create a class that inherits the functionality from another class, send the parent class as a parameter when creating the child class:
+
+  Example
+  Create a class named Student, which will inherit the properties and methods from the Person class:
+
+  class Student(Person):
+    pass
+  Note: Use the pass keyword when you do not want to add any other properties or methods to the class.
+
+  Now the Student class has the same properties and methods as the Person class.
+
+  Example
+  Use the Student class to create an object, and then execute the printname method:
+
+  x = Student("Mike", "Olsen")
+  x.printname()
+
+  Add the __init__() Function
+  So far we have created a child class that inherits the properties and methods from its parent.
+
+  We want to add the __init__() function to the child class (instead of the pass keyword).
+
+  Note: The __init__() function is called automatically every time the class is being used to create a new object.
+
+  Example
+  Add the __init__() function to the Student class:
+
+  class Student(Person):
+    def __init__(self, fname, lname):
+      #add properties etc.
+  When you add the __init__() function, the child class will no longer inherit the parent's __init__() function.
+
+  Note: The child's __init__() function overrides the inheritance of the parent's __init__() function.
+
+  To keep the inheritance of the parent's __init__() function, add a call to the parent's __init__() function:
+
+  Example
+  class Student(Person):
+    def __init__(self, fname, lname):
+      Person.__init__(self, fname, lname)
+  Now we have successfully added the __init__() function, and kept the inheritance of the parent class, and we are ready to add functionality in the __init__() function.
+
+  Use the super() Function
+  Python also has a super() function that will make the child class inherit all the methods and properties from its parent:
+
+  Example
+  class Student(Person):
+    def __init__(self, fname, lname):
+      super().__init__(fname, lname)
+  By using the super() function, you do not have to use the name of the parent element, it will automatically inherit the methods and properties from its parent.
+
+  Add Properties
+  Example
+  Add a property called graduationyear to the Student class:
+
+  class Student(Person):
+    def __init__(self, fname, lname):
+      super().__init__(fname, lname)
+      self.graduationyear = 2019
+  In the example below, the year 2019 should be a variable, and passed into the Student class when creating student objects. To do so, add another parameter in the __init__() function:
+
+  Example
+  Add a year parameter, and pass the correct year when creating objects:
+
+  class Student(Person):
+    def __init__(self, fname, lname, year):
+      super().__init__(fname, lname)
+      self.graduationyear = year
+
+  x = Student("Mike", "Olsen", 2019)
+  Add Methods
+  Example
+  Add a method called welcome to the Student class:
+
+  class Student(Person):
+    def __init__(self, fname, lname, year):
+      super().__init__(fname, lname)
+      self.graduationyear = year
+
+    def welcome(self):
+      print("Welcome", self.firstname, self.lastname, "to the class of", self.graduationyear)
+  If you add a method in the child class with the same name as a function in the parent class, the inheritance of the parent method will be overridden.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Python has the following data types built-in by default, in these categories:
+
+Text Type:	str
+Numeric Types:	int, float, complex
+Sequence Types:	list, tuple, range
+Mapping Type:	dict
+Set Types:	set, frozenset
+Boolean Type:	bool
+Binary Types:	bytes, bytearray, memoryview
+None Type:	NoneType
+
+loginUserActionGetOnly
+
+variables --> memory locations to store values
+
+placeholders --> %s, %d <-- temp holds for subsitution later on
+%s --> placeholder for string
+%d --> placeholder for integer
+ ex:
+ x="abc"
+ y="%s def"
+ y%x >> abc def
+ z="%s %s ghi"
+ z%(a,b)
+
+%s takes integer
+BUT
+%d DOES NOT takes string
+
+p="%s %d lets try"
+Failure scenario -- wen string is passed for %d >>
+p%(a,fn)
+Traceback (most recent call last):
+  File "/Applications/PyCharm CE.app/Contents/plugins/python-ce/helpers/pydev/pydevconsole.py", line 364, in runcode
+    coro = func()
+  File "<input>", line 1, in <module>
+TypeError: %d format: a number is required, not str
+
+Success scenario >>
+p%(fn,b)
+'Jas 3 lets try'
+
+
+list >> comma separated value to store n access any item
+each variable in Python is indexed. 1st item is alwys at location zero
+
+a=[1,2,3,4]
+b=['a','b','c','d']
+
+del b[3]  <-- index location
+
+b.append('e')
+
+b
+['a', 'b', 'c', 'd', 'e']
+
+del b[2]
+b
+['a', 'b', 'd', 'e']
+
+len(a)
+4
+
+a+b
+[1, 2, 3, 4, 'a', 'b', 'd', 'e']
+
+a*2
+[1, 2, 3, 4, 1, 2, 3, 4]
+
+max(a)
+4
+
+min(a)
+1
+
+max(b)
+'e'
+
+min(b)
+'a'
+
+
+Dictionaries -- Data Structure -- good use for JSON format for name-value pairs
+ds={'a':1,'b':2,'c':3}
+
+ds
+{'a': 1, 'b': 2, 'c': 3}
+
+ds['a']
+1
+
+ds['a']=5
+ds['a']
+5
+
+ds
+{'a': 5, 'b': 2, 'c': 3}
+
+len(ds)
+3
+
+del ds['b']
+len(ds)
+2
+
+ds
+{'a': 5, 'c': 3}
+
+
+Tuples: -- like lists but these r immutable (cant change or b deleted, can only add) secrets
+Difference in syntax from lists
+    Lists uses []
+    Tuples use ()
+
+a=[1,2,3,4] <-- list
+b=(1,2,34)  <-- tuple
+
+u can delete entire tuple but cant remove specific items within tuple
+
+tup1=(1,2,3)
+tup1
+(1, 2, 3)
+
+tup1[0]
+1
+
+tup1[0:2]
+(1, 2)
+
+len(tup1)
+3
+
+tup1*3
+(1, 2, 3, 1, 2, 3, 1, 2, 3)
+
+[] Conditional Sttmts:
+
+if (age>c):
+    print("true")
+else:
+    print("false")
+
+true
+if (age==c):
+    print("true")
+else:
+    print("false")
+
+false
+
+if (age==c):
+    print("true")
+elif (age>c and c<age):
+    print("lets see")
+else:
+    print("false")
+
+lets see
+
+
+[] Loops: -- to iterate over a data structure or numbers
+for loop <-- range function
+
+for i in b:
+    print(i)
+
+a
+b
+d
+e
+
+for i in range(0,5):
+    print(i)
+
+0
+1
+2
+3
+4
+
+
+skip function >> skip in increments
+
+for i in range (0,51,5):
+    print(i)
+
+0
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+
+
+for i in range(0,3):
+    for j in range(0,2):
+        print(j)
+
+0
+1
+0
+1
+0
+1
+
+
+
+[] while loops: <-- continue to run till condition becomes false
+break, continue & pass
+
+while age < 40:
+    print(age)
+    age = age +1
+
+38
+39
+
+while age < 40:
+    print(age)
+    if age == 39
+      break
+    age = age +1
+
+38
+39
+
+pass <-- filler sttmt, kind of null to keep a temp placeholder not to do anything
+and add anything in future
+
+
+[] try & except case : <-- add function in try, if not sure that it will work or not
+& if it breaks, except is executed
+finally can also be used at the ends
+
+try:
+    if abc > 0:
+        print("hello")
+except:
+    print("not good, abc doesnt looks defined")
+
+
+not good, abc doesnt looks defined
+
+
+ multi-line comment >> 3 quotation marks >>
+ """
+ this is
+ multi lines
+ comment
+ """
+
+
+[] functions: <-- help write & manage block of code more efficiently and for reuse
+
+
+def HellowWorld():
+    print("Hello World")
+
+HellowWorld()
+Hello World
+
+
+def Hello(name):
+    print("Hi" + name + " !")
+
+Hello("Seerat")
+HiSeerat !
+def Hello(name):
+    print("Hi " + name + " !")
+
+Hello("Seerat")
+Hi Seerat !
+
+
+def Add(num1, num2):
+    print(num1 + num2)
+
+Add(5,7)
+12
+
+
+def Add(num1, num2):
+    print(num1 + num2)
+
+Add(5,7)
+12
+
+[] in-built functions:
+abs(-23) <-- returns +ve value
+23
+
+bool(0)
+False
+
+bool(1)
+True
+
+bool(None)
+False
+
+dir("Hello") <-- gives list of all functions tht can be used with it
+
+['__add__', '__class__', '__contains__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getitem__', '__getnewargs__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__len__', '__lt__', '__mod__', '__mul__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__rmod__', '__rmul__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'capitalize', 'casefold', 'center', 'count', 'encode', 'endswith', 'expandtabs', 'find', 'format', 'format_map', 'index', 'isalnum', 'isalpha', 'isascii', 'isdecimal', 'isdigit', 'isidentifier', 'islower', 'isnumeric', 'isprintable', 'isspace', 'istitle', 'isupper', 'join', 'ljust', 'lower', 'lstrip', 'maketrans', 'partition', 'replace', 'rfind', 'rindex', 'rjust', 'rpartition', 'rsplit', 'rstrip', 'split', 'splitlines', 'startswith', 'strip', 'swapcase', 'title', 'translate', 'upper', 'zfill']
+
+
+help(ln.upper)
+
+Help on built-in function upper:
+upper() method of builtins.str instance
+    Return a copy of the string converted to uppercase.
+
+
+help(ln.splitlines)
+Help on built-in function splitlines:
+splitlines(keepends=False) method of builtins.str instance
+    Return a list of the lines in the string, breaking at line boundaries.
+
+    Line breaks are not included in the resulting list unless keepends is given and
+    true.
+
+
+    test='print("Hi")'
+
+    eval(test) <-- takes string n runs it as python code
+    Hi
+
+    exec(test) <-- same as eval but takes in multi-line code
+    Hi
+
+====================
+    a=1
+    b=1.1
+    c=1j
+
+    print("Hello World")
+    print(type(a))
+    print(type(b))
+    print(type(c))
+====================
+
+********************
+/Users/jasdil/Documents/Learnings/Python/bin/python /Users/jasdil/Documents/Learnings/Python/HelloWorld.py
+Hello World
+<class 'int'>
+<class 'float'>
+<class 'complex'>
+
+Process finished with exit code 0
+********************
+
+
+
+
+
+convert data into different formats >>
+    a=str(age)
+    '40'
+
+    a=int(age)
+    40
+
+    a=float(age)
+    40.0
+
+[] OOP :
+classes (create structure) n objects (instance of class)
+
+
+class Person:
+    pass
+
+p = Person()
+
+p
+<__main__.Person object at 0x1105b2eb0>
+
+
+self <-- this like kind of current pointer/object/intance
+return <-- signals end of function block, any sttmt after that is not executed
+args, kwargs
+def my_func(*args,*kwargs) <-- any no. of args and any no. of dictionary values
+  print(kwargs) <-- will display [ 'var1' : 56, 'var2' : 23]
+my_func(1,2,3,4,5,var1=56,var4=23)
+
+class abcd:
+    def getName(self):
+        print("Jas")
+    def getAge(self):
+        print("38")
+
+r=abcd()
+
+r.getName()
+Jas
+
+r.getAge()
+38
+
+init function allows us to create an object of a class wid specific properties
+__init__
+
+
+class abcd:
+    def __init__(self, name, age):
+        self.name=name
+        self.age=age
+    def getName(self):
+        print("Name is set to " + self.name)
+    def getAge(self):
+        print("Age is set to " + self.age)
+
+
+p1=abcd() <-- Now this will give error as it expects values to be passed
+
+Traceback (most recent call last):
+  File "/Applications/PyCharm CE.app/Contents/plugins/python-ce/helpers/pydev/pydevconsole.py", line 364, in runcode
+    coro = func()
+  File "<input>", line 1, in <module>
+TypeError: __init__() missing 2 required positional arguments: 'name' and 'age'
+
+
+p1=abcd("Seerat","7")
+p1.getAge()
+Age is set to 7
+
+p1.getName()
+Name is set to Seerat
+
+
+[] Inheritance:
+class Parent:
+    def __initi__(self):
+        print("This is Parent Class")
+    def parentFun(self):
+        print("This is parent func")
+
+class Child(Parent):
+    def __init__(self):
+        print("This is Child class")
+    def childFunc(self):
+        print("This is Child funct")
+
+c=Child()
+This is Child class
+
+c.parentFun()
+This is parent func
