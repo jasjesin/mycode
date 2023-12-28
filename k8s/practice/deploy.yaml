@@ -1,0 +1,46 @@
+#file: noinspection YAMLSchemaValidation
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-frontend
+  labels:
+    name: httpd-frontend
+    tier: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: httpd-frontend-pod
+  template:
+    metadata:
+      labels:
+        name: httpd-frontend-pod
+        tier: frontend
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4-alpine
+        resources:
+          requests:
+            memory: 200Mi
+            cpu: 100m
+          limits:
+            memory: 300Mi
+            cpu: 200m
+        env:
+          - name: CDN_URL
+            value: https://cdn.test.net/1
+          - name: UID
+            valueFrom:
+              secretKeyRef:
+                name: app-cred  # thats name of secret file metadata name
+                key: user
+        volumeMounts:
+          - name: pv1
+            mountPath: /opt/app/webapp
+      volumes:
+        - name: pv1
+          persistentVolumeClaim:
+            claimName: test-pvc
+

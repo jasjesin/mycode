@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce   # this means RW allowed from 1 node only
+#                     Other avl access modes >>
+#    - ReadWriteMany  # RW allowed from multiple hosts
+#   - ReadOnlyMany    # R allowed from multiple hosts
+  resources:
+    requests:
+      storage: 1Gi
+
