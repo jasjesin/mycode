@@ -1,0 +1,265 @@
+alias k="kubectl"
+alias ks="kubectl -n kube-system"
+cat /etc/hosts
+cat /etc/resolv.conf
+cat /proc/sys/net/ipv4/ip_forward
+docker network ls
+docker pull jenkins
+docker pull jenkins:alpine
+export do="--dry-run=client -o yaml"
+echo $do
+ifconfig
+ifconfig en3 | grep inet
+ifconfig ens3 | grep inet
+ifconfig | grep inet
+ip link
+iptables
+k -n project-tiger run tigers-reunite \  \n--image=httpd:2.4.41-alpine \  \n--labels "pod=container,container=pod" --dry-run=client -o yaml
+k -n project-toger run tigers-reunite --image=httpd:2.4.41-alpine --labels "pod=container,container=pod" --dry-run=client -o yaml
+k api-resources
+k api-resources --namespaced -o name
+k api-resources --namespaced=true
+k api-resources --namspaced -o name
+k api-resources --namspaced=true
+k api-resources -o yaml
+k auth can-i -h
+k auth can-i create po
+k auth can-i get po
+k config current-context
+k config get-context
+k config get-contexts
+k config get-contexts -o NAME
+k config get-contexts -o name
+k config get-contexts -ow name
+k config view -o jsonpath="{.contexts[*].name} | tr " " "\n""
+k config view -o jsonpath="{.contexts[*].name}"
+k config view -o jsonpath="{.contexts[*].name}" | tr " " "\n"
+k config view -o jsonpath="{.contexts[*].name}"k config view -o jsonpath="{.contexts[*].name}"
+k config view -o jsonpath={..clusters.contexts[].context.name}
+k config view -o jsonpath={.clusters.cluster.contexts[*].context.name}
+k config view -o jsonpath={.clusters.contexts[*].context.name}
+k config view -o jsonpath={.clusters.contexts[].context.name}
+k config view -o jsonpath={.clusters[*].cluster.contexts[*].context.name}
+k config view -o jsonpath={.clusters[*].contexts[*].context.name}
+k config view -o jsonpath={.clusters[*]}
+k config view -o jsonpath={.clusters[].contexts[*].context.name}
+k config view -o jsonpath={.clusters[]}
+k config view -o jsonpath={.clusters}
+k config view -o jsonpath={.context[*]}
+k config view -o jsonpath={.contexts.context.name}
+k config view -o jsonpath={.contexts.context[*].name}
+k config view -o jsonpath={.contexts.context[*]}
+k config view -o jsonpath={.contexts.context[].name}
+k config view -o jsonpath={.contexts.context[]}
+k config view -o jsonpath={.contexts.context}
+k config view -o jsonpath={.contexts[*].name
+k config view -o jsonpath={.contexts[*].name}
+k config view -o jsonpath={.contexts}
+k config view -o jsonpath={.context}
+k config view -o yaml
+k creat -h
+k create -h
+k create deploy ds-important --image=ds-important --label uuid=18426a0b-5f59-4e10-923f-c0e078e82462 --dry-run=client -o yaml
+k create deploy ds-important --image=ds-important --labels id=ds-important --labels uuid=18426a0b-5f59-4e10-923f-c0e078e82462 --dry-run=client -o yaml
+k create deploy ds-important --image=httpd:2.4-alpine --dry-run=client -o yaml
+k create deploy safari --image=httpd:2.4.41-alpine -n project-tiger --dry-run=client -o yaml
+k create netpol --name=np-backend -n np-backend --dry-run=client -o yaml
+k create netpol -n np-backend --dry-run=client -o yaml
+k create netpol np-backend -n np-backend --dry-run=client -o yaml
+k create ns secret --dry-run=client -o yaml
+k create po multi-container-playground --image:multi-container-playground --dry-run=client -o yaml
+k create po multi-container-playground --image:nginx:1.17.6-alpine --dry-run=client -o yaml
+k create pv safari-pv --dry-run=client -o yaml
+k create role processor -n project-hamster --verb=create --resource=secret --resource=configMap --dry-run=client -o yaml
+k create role processor -n project-hamster --verb=create --verb=secret --verb=configMap --dry-run=client -o yaml
+k create rolebinding processor -n project-hamster --role=processor --serviceAccount=project-hamster:processor --dry-run=client -o yaml
+k create rolebinding processor -n project-hamster --role=processor --serviceaccount=project-hamster:processor --dry-run=client -o yaml
+k create sa processor -n project-hamster --dry-run=client -o yaml
+k create secret generic secret2 -n secret --from-literal=user=user1 --from-literal=pass=1234 --dry-run=client -o yaml
+k create secret secret2 -n secret --from-literal "user=user1,pass=1234" --dry-run=client -o yaml
+k create secret secret2 -n secret --from-literal=user=user1 --from-literal=pass=1234 --dry-run=client -o yaml
+k create secret secret2 -n secret --literals "user=user1,pass=1234" --dry-run=client -o yaml
+k delete po am-i-ready
+k delete po jenkins
+k describe cm coredns -n kube-system
+k describe no docker-desktop
+k describe no docker-desktop | grep -i taint
+k describe po jenkins| less -p
+k describe po jenkins| less -p equest
+k describe po jenkins| less -pi request
+k describe po | less -pi request
+k describe svc kubernetes
+k expose --help
+k expose --help | grep ort
+k expose --help | grep port
+k expose po/jenkins --type=NodePort --port:8080
+k expose po/jenkins --type=NodePort --port=8080
+k expose svc jenkins --name=static-pod-service --type=NodePort --port=80 --dry-run=client -o yaml
+k expose svc my-static-pod-docker-desktop --name=static-pod-service --type=NodePort --port=80 --dry-run=client -o yaml
+k get all
+k get all --no-header
+k get all -A
+k get all -A --no-header
+k get all -A | grep -i cni
+k get all -A | grep -i kube
+k get all -A | grep -i weave
+k get all -no-header
+k get api-resources
+k get cm -A
+k get deploy
+k get deploy -A
+k get ds, sts
+k get ds,sts
+k get ds,sts -A
+k get ds,sts,deploy -A
+k get ep
+k get ep -A
+k get event -A
+k get events
+k get events -A
+k get events -A --sort-by=.metadata.creationTime
+k get events -A --sort-by=.metadata.creationTimestamp
+k get events -A --sort-by=metadata.creationTimestamp
+k get netpol -A
+k get netpol -A -o yaml
+k get no
+k get no --selector=beta.kubernetes.io/arch=amd32
+k get no --selector=beta.kubernetes.io/arch=amd64
+k get no --show-labels
+k get no --show-labels | grep Exists
+k get no -o wide
+k get no -o=jsonpath='{.items[*].status.capacity.cpu}'
+k get no -o=jsonpath='{.items[*].status.capacity.memory}'
+k get no -o=jsonpath='{.items[*].status.capacity.pods}'
+k get no -o=jsonpath='{.items[*].status.capacity}'
+k get no -o=jsonpath='{.items[].metadata.name}'
+k get np -A
+k get ns
+k get po
+k get po --help
+k get po --no-header
+k get po --no-header | sort
+k get po --no-headers
+k get po --no-headers | wc -l
+k get po --sort-by="{.items[*].metadata.creationTimestamp}"
+k get po --sort-by="{.metadata.creationTimestamp}"
+k get po --sort-by='AGE'
+k get po --sort-by='metadata.creationTimestamp'
+k get po --sort-by='metadata.name.creationTimestamp'
+k get po --sort-by='metadata.uid'
+k get po -A
+k get po -A --sort-by="{.metadata.creationTimestamp}"
+k get po -A --sort-by="{.metadata.uid}"
+k get po -A -o jsonpath="{.metadata.creationTimestamp}"
+k get po -A | grep jenkins
+k get po -o jsonpath="{.items.apiVersion}"
+k get po -o jsonpath="{.items.metadata}"
+k get po -o jsonpath="{.items[*].metadata.creationTimestamp}"
+k get po -o jsonpath="{.items[*].metadata.creationTimestamp}" | tr " " "\n"
+k get po -o jsonpath="{.items[*].metadata.creationTimestamp}" | tr " " "\n" | sort
+k get po -o jsonpath="{.items[*].metadata.labels.name} {.items[*].metadata.creationTimestamp}" | tr " " "\n" | sort
+k get po -o jsonpath="{.items[*].metadata.name} {.items[*].metadata.creationTimestamp}" | \nk get po -o jsonpath="{.items[*].metadata.name} {.items[*].metadata.creationTimestamp}"
+k get po -o jsonpath="{.items[*].metadata.name} {.items[*].metadata.creationTimestamp}" | tr " " "\n" | sort
+k get po -o jsonpath="{.items[*].metadata.name}"
+k get po -o jsonpath="{.items[].apiVersion}"
+k get po -o jsonpath="{.items[].metadata.creationTimestamp}"
+k get po -o jsonpath="{.items[].metadata}"
+k get po -o jsonpath="{.items}"
+k get po -o jsonpath="{.metadata.creationTimestamp}"
+k get po -o jsonpath="{.spec.nodeName}"
+k get po -o jsonpath="{items[*].spec.nodeName}"
+k get po -o jsonpath="{items[].spec.nodeName}"
+k get po -o yaml
+k get po -o yaml | grep -i time
+k get po -o yaml | less
+k get po -w
+k get po jenkins -o jsonpath="{.metadata.creationTimestamp}"
+k get po jenkins -o jsonpath="{.metadata}"
+k get po jenkins -o jsonpath="{.spec.nodeName}"
+k get po jenkins -o yaml
+k get po | sort
+k get po | sort -r
+k get po, deploy
+k get po,deploy
+k get po,deploy,svc
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.conditions[*]} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.conditions[]} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.containerStatuses[].state} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.hostIP} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status.capacity.cpu} {"\n"} {end}'\n
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status.capacity} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status.hostIP} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status.podIPs[].ip} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status.podIPs[]} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status} {"\n"} {end}'
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status} {"\n"} {end}' | grep cpu
+k get pods -o=jsonpath='{range .items[*]}{.metadata.name} {"\t"} {.status} {"\n"} {end}' | grpe cpu
+k get pv -A
+k get pv, pvc
+k get pv,pvc
+k get rolebinding -A -o wide
+k get roles
+k get roles -A
+k get roles -A --jsonpath="{.items[*].metadata.name}"
+k get roles -A -jsonpath="{.items[*].metadata.name}"
+k get roles -A -o jsonpath="{.items[*].metadata.name} | tr ' ' '\n'"
+k get roles -A -o jsonpath="{.items[*].metadata.name}"
+k get roles -A -o jsonpath="{.items[*].metadata.name}" | tr ' ' '\n'
+k get roles -A -o wide
+k get roles -n kube-public -o yaml
+k get roles -o yaml
+k get secrets -A
+k get svc
+k get svc --show-labels
+k get svc,ep -A
+k logs -f po/jenkins
+k logs po/jenkins
+k logs po/jenkins --previous
+k logs po/nginx --previous
+k run am-i-ready --image=nginx:1.16.1-alpine $do
+k run am-i-ready --image=nginx:1.16.1-alpine --dry-run=client -o yaml
+k run jenkins --image=jenkins
+k run jenkins --image=jenkins/jenkins
+k run jenkins --image=jenkins:alpine
+k run manual-schedule --image=httpd:2.4-alpine --dry-run=client -o yaml
+k run manual-schedule2 --image=httpd:2.4-alpine --dry-run=client -o yaml
+k run multi-container-playground --image:multi-container-playground --dry-run=client -o yaml
+k run multi-container-playground --image:nginx:1.17.6-alpine --dry-run=client -o yaml
+k run multi-container-playground --image=nginx:1.17.6-alpine --dry-run=client -o yaml
+k run my-static-pod --image=nginx:1.16-alpine --dry-run=client -o yaml
+k run nginx --image=nginx:alpine
+k run pod1 --image=httpd:2.4.41-alpine --dry-run=client -o yaml
+k run ready-if-service-ready --image=ready-if-service-ready --dry-run=client -o yaml
+k run secret-pod -n secret --image=busybox:1.31.1 --dry-run=client -o yaml
+k top no
+k top po
+ks describe cm kube-proxy
+ks describe cm kube-proxy -o yaml
+ks describe deployment.apps/coredns
+ks describe deployment.apps/coredns -o yaml
+ks describe ds/kube-proxy
+ks describe ds/kube-proxy -o yaml
+ks describe kube-proxy-z4f8c
+ks describe po kube-apiserver-docker-desktop
+ks describe po kube-apiserver-docker-desktop -o yaml
+ks describe po/kube-proxy-z4f8c
+ks exec -ti kube-proxy-z4f8c -- /bin/bash
+ks exec kube-proxy-z4f8c -- "ls -l /var/lib/"
+ks exec kube-proxy-z4f8c -- "ls -l /var/lib/kube-proxy/"
+ks exec kube-proxy-z4f8c -- ls -l /var/lib/kube-proxy/
+ks get cm
+ks get deploy
+ks get ds
+ks get ep kube-dns
+ks get po
+kubeadm certs check-expiration
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-versions=$(kubectl version | base64 | tr -d '\n')"
+kubectl create secret generic my-secret-literal --from-literal=key1=value1 --from-literal=key2=value2 --dry-run=client -o yaml
+ls -ltrh /etc/cni/
+ls -ltrh /etc/resolv.conf
+ls -ltrh /opt/cni
+netns
+netstat -natulnp
+nslookup -q=aaaa 2600:1700:78e0:7231::1
+route
+service kubelet status

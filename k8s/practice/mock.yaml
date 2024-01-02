@@ -1,0 +1,359 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pod1
+  name: pod1
+  namespace: default
+spec:
+  containers:
+  - image: httpd:2.4.41-alpine
+    name: pod1-container
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+tolerations:
+  - effect: NoSchedule
+    key: kubernetes.io/hostname=docker-desktop
+nodeSelector:
+  kubernetes.io/hostname=docker-desktop
+status: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: ready-if-service-ready
+  name: ready-if-service-ready
+spec:
+  containers:
+  - image: ready-if-service-ready
+    name: ready-if-service-ready
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  livenessProbe:
+    command:
+    - 'True'
+  readinessProbe:
+    command:
+    - 'sh'
+    - '-c'
+    - 'wget -T2 -O- http://service-am-i-ready:80'
+
+status: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: am-i-ready
+    id: cross-server-ready
+  name: am-i-ready
+spec:
+  containers:
+  - image: nginx:1.16.1-alpine
+    name: am-i-ready
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: safari-pv
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Volumes/Data"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: safari-pvc
+  namespace: project-tiger
+spec:
+  resources:
+    requests:
+      storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: safari
+  name: safari
+  namespace: project-tiger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: safari
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: safari
+    spec:
+      containers:
+      - image: httpd:2.4.41-alpine
+        name: httpd
+        resources: {}
+      volumeMounts:
+      - name: data
+      mountPath: /tmp/safari-data
+      volumes:
+      - name: data
+      persistentVolumeClaim:
+        claimName: safari-pvc
+
+
+status: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: manual-schedule
+  name: manual-schedule
+spec:
+  containers:
+  - image: httpd:2.4-alpine
+    name: manual-schedule
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: manual-schedule2
+  name: manual-schedule2
+spec:
+  nodeName: docker-desktop
+  containers:
+  - image: httpd:2.4-alpine
+    name: manual-schedule2
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: processor
+  namespace: project-hamster
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: processor
+  namespace: project-hamster
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  verbs:
+  - create
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: processor
+  namespace: project-hamster
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: processor
+subjects:
+- kind: ServiceAccount
+  name: processor
+  namespace: project-hamster
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: ds-important
+    id: ds-important
+    uuid: 18426a0b-5f59-4e10-923f-c0e078e82462
+    namespace: project-tiger
+  name: ds-important
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      id: ds-important
+      uuid: 18426a0b-5f59-4e10-923f-c0e078e82462
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        id: ds-important
+        uuid: 18426a0b-5f59-4e10-923f-c0e078e82462
+    spec:
+      containers:
+      - image: httpd:2.4-alpine
+        name: httpd
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+    tolerations:
+    - effect: NoSchedule
+      key: kubernetes.io/hostname=docker-desktop
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: multi-container-playground
+  name: multi-container-playground
+spec:
+  containers:
+  - image: nginx:1.17.6-alpine
+    name: c1
+    env:
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodename
+    volumeMounts:
+    - name: vol
+      mountPath: /vol
+  - image: busybox:1.31.1
+    name: c2
+    command:
+      [ 'sh', '-c', 'while true; do date >> /your/vol/path/date.log; sleep 1; done']
+    volumeMounts:
+    - name: vol
+      mountPath: /vol
+  - image: busybox:1.31.1
+    name: c3
+    command:
+      [ 'sh', '-c', 'tail -f /your/vol/path/date.log']
+    volumeMounts:
+    - name: vol
+      mountPath: /vol
+    resources: {}
+  volumes:
+  - name: vol
+  emptyDir: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secret
+spec: {}
+status: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: secret-pod
+  name: secret-pod
+  namespace: secret
+spec:
+  containers:
+  - image: busybox:1.31.1
+    name: secret-pod
+  env:
+  - name: APP_USER
+    valueFrom:
+      secretKeyRef:
+        name: secret2
+        key: user
+  - name: APP_PASS
+    valueFrom:
+      secretKeyRef:
+        name: secret2
+        key: pass
+  volumeMounts:
+  - name: secret1
+    mountPath: /tmp/secret1
+    readOnly: true
+volumes:
+  - name: secret1
+    secret:
+      secretName: secret1
+resources: {}
+dnsPolicy: ClusterFirst
+restartPolicy: Always
+status: {}
+
+---
+apiVersion: v1
+data:
+  pass: MTIzNA==
+  user: dXNlcjE=
+kind: Secret
+metadata:
+  name: secret2
+  namespace: secret
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: my-static-pod
+  name: my-static-pod
+spec:
+  containers:
+  - image: nginx:1.16-alpine
+    name: my-static-pod
+    resources: 
+      requests:
+        cpu: 10m
+        memory: 20Mi
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: my-static-pod-cluster3-controlplane1
+  name: static-pod-service
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: my-static-pod-cluster3-controlplane1
+  type: NodePort
+status:
+  loadBalancer: {}
