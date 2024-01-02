@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-cm
+data:
+  db_port: "3306"
+  db_driver: "thin_client"

@@ -36,11 +36,26 @@ spec:
               secretKeyRef:
                 name: app-cred  # thats name of secret file metadata name
                 key: user
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: app-cm
+                key: db_port
+          - name: DB_DRIVER
+            valueFrom:
+              configMapKeyRef:
+                name: app-cm
+                key: db_driver
         volumeMounts:
           - name: pv1
             mountPath: /opt/app/webapp
+          - name: cm
+            mountPath: /opt/app
       volumes:
         - name: pv1
           persistentVolumeClaim:
             claimName: test-pvc
+        - name: cm
+          configMap:
+            name: app-cm
 
