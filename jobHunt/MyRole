@@ -1,0 +1,94 @@
+Any Senior Devops with expertise in
+
+1. AWS,
+2. CI/CD, Jenkins, GIT, (ansible, JPL, DSL)
+3. Docker,
+4. Python/Bash or Unix scripting.
+
+
+repository to store code is bitbucket
+BB performs workflows for code reviews n approvals
+svn (for metadata n config setup) and GIT (for code)
+    are used as version ctrl tools to checkin/checkout/commit code
+Jenkins ZBB (pre-merge check, PR Builder)  n CI svrs setup in Master Slave Archictecture
+Jenkins Pipeline Libraries written in groovy script,
+    for PR builder, checkin, checkout, pre-commit, post-commit hooks etc
+Jenkins DSL Plugin used to write/setup Jenkins Jobs/Pipelines, that invoke
+      Jenkins Pipeline Libraries
+
+creator.py is setup to create list of hosts, based on conditions, to generate inventory.xml file
+This file is referred by deploy.yml file, that is the main entry point for ansible for CD.
+
+For CD,
+  Ansible playbooks are written in yaml format, and artifacts are setup in Roles framework
+            to make reusable components
+
+  roles are used at play level, with 8 main std directories setup, each containing main.yaml,
+      that triggers needed tasks wid smaller/reusable tasks defined.
+
+  like tasks, handlers, templates, files, vars, defaults, meta, library, lookup_plugins
+
+  main.yaml at play lvl is the main entry point that contains modules n re-usable tags that
+        contain pre-defined set of tasks to be performed
+
+  like for deployment, we set tags as pre-common, common, post-common
+
+    pre-common will contain tasks like disabling node from LB/VIP, turning off monitoring,
+          graceful shutdown, status check, if not down, forcible kill n then status check
+
+    common will contain actual deployment, this will again pull modules' tasks from
+          Just like ansible-galaxy has open-src reusable modules accessible publicly
+            same way, internal firm-specific galaxy, contains re-usable modules for customizations needed on servers
+                  like tomcat, apache, nginx,JBOSS wildfly, WAS, nodeJS or standalone Java springboot process etc
+                  to be stopped/deployment/started
+
+    post-common will include basic sanity tests, instrument metrics, status chk,
+          verification if all green, then enabling nodes back in VIP
+
+similar setup for creating docker images tht r stored in JFrog Artifactory
+
+Docker setup using Compose Tool to define n run multi-container docker apps
+-  with Envoy Control Plane as side-car network edge-proxy service
+            to take care of all incoming/outgoing network calls
+-  Consul Client to broadcast application service in Service Mesh
+Runs at port 9001 n status can be checked via URL context /health or /healthcheck
+
+bash n python scripts r used in conjunction
+we use 2 different application frameworks for configuration mgmt
+    1st 26 yrs old framework, based on flat-file system, and uses push-approach
+        (push all metadata to each node)
+
+    2nd is 8 yrs old, based on Puppet ENC Engine, & uses pull-approach
+        (all metadata maintained at central repo & only node-specific metadata
+        is cherry picked & sent to chromes file)
+      we use ruby-scripting to setup/enhance config files used here in puppet framework
+
+
+
+About the project?
+·         How did you implemented AWS in your current project?
+·         Did you use Java Lambda OR Python Lambda function?
+·         Step by step process to develop Java based Lambda function?
+·         What is the trigger on Lamba?
+·         How do you integrate Lamba & S3 Trigger?
+·         Question regarding API Gateway
+·         Questions on Microservices
+·         What is the need of Java Lambda?
+·         advantage & disadvantage of using Lamba
+·         How do you develop & deploy Java lambda
+·         How do you deploy AWS
+·         What are the different runtime
+·         What is Cold start time in Lamba?
+·         Provisional Concurrency lamba
+·         What type of factors using in Microservice
+·         design pattern & architecture of microservices
+·         API Gateway pattern
+·         how does design circuit breaker works
+·         Spring boot life cycle
+·         How will you reset the circuit breaker?
+·         difference between spring boot application & rapid application
+·         How do you implement API throttling?
+·         Spring bean?
+·         Who manages the spring bean?
+·         How do you implement spring security?
+·         difference between hashmap & hash set

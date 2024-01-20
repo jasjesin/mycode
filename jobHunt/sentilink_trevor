@@ -1,0 +1,139 @@
+Trevor's been in InfoSec earlier n now in Infrastructure
+  lot of infoSec work is infra, like how do u secure infra,
+    huge amt of overlap b/w infoSec n infra
+  knows s/w engg. like scyla, python, goLang
+  done Engineering & Devops earlier
+  Data Science is his next focus
+
+small company, will get to do a lot more things than just k8s
+
+Infra SRE
+  We do administration of k8s,
+  we also build infra using tf,
+  we also do SRE work
+  we also do DB Architecture
+  we doing all sorts of stuff
+  we do application load balancers
+  we do communications for TLS
+  DevOps, all within our scope
+  its all over the map, we'll take broader range
+
+  one of the things Trevor wants for this role is
+    get into things & own it, figure out how to do it & get it done
+    he wants ppl who have that drive
+    u see a problem, u go & solve it
+    dont care if its somebody else's scope
+    they dont care either
+    we all try to work as a team to get something done, so lets do it
+    i hate wen ppl r protective on scope
+
+  AWS Security
+    key mgmt
+    secrets mgmt
+    how u login to EC2 instances
+    how u login to DBs
+    how u do access ctrl
+    n/w security
+    its all AWS security for most part
+    keys mgmt, secrets mgmt
+    These r big gaps tht need a lot of focus
+    most companies hv issues wid infra security
+
+  If i work under Trevor,
+    he'll try to drive me to understand policy
+    how it applies in infoSec
+    how to accomplish things from infra perspective to meet policy best practices
+
+    lot of infra drive, here, is towards move to best practice
+    getting those foundations & improving foundational security
+
+    wen Trevor joined Sentilink,
+      all infra was in a single AWS a/c
+      he worked on to split diff. environments wid diff. a/cs.
+
+      SpaceLift -- CI/CD in tf
+
+  Driving towards IaaC, good practices towards deploying infra
+  a lot of stuff goes into security.
+  We need change ctrl
+  ephemeral infra, dont want svrs tht r long-lived,
+    dont want ppl to make changes to svcs by hand
+    thats a foundational security concern.
+
+  if i want good alerting on my svr,
+    i wanna know wen somebody logged on n made a change
+  thrs lot of noise n tons of changes like OS-related changes etc
+  all that false alert noise needs to reduce so that
+  if somebody does make a change, wen somebody breaks into svr,
+    we need to know abt it right away.
+
+  no clicking in AWS console,
+  need an alert each time somebody makes a change or creates a resource or
+    a deployment happens outside of spaceLift, tf
+
+  all infra should b built using s/w development, all IaaC
+
+  GITOps enables security n makes it much easier
+  GITOps is lil bit WIP
+
+  been doing lot of migrations earlier. SpaceLift is 1st deploy
+  all tf modules r in spaceLift
+  thr r 2 apps tht r lil bit difficult to transition in
+
+  start alerting wen ppl make changes or thru console
+  nobody should be using roles to create infra anymore
+
+  u shouldnt login as admin to console, ppl need break-glass thing for exceptions
+
+  nobody uses admin access
+
+  if anybody logs in as admin, raise an alert
+  thts the kind of stuff which will catch a hacker
+
+  start seeing somebody doing weird, u investigate
+
+  meeting best practice really enables u to meet high quality security
+
+  its all abt high quality n hygiene
+
+  we use AWS, postGres, k8s
+  we rely heavily on AWS managed svcs, cuz its much less work
+
+  serverless EKS wid fargate, is next plan, once AWS starts supporting calico
+
+  kms, secrets mgr
+
+  infra sre n devops
+    sre -- doing development work so that u can improve operations
+      developing monitoring n alerting,
+      wen u see an issue come up n u didnt catch it in time or wasnt escalated properly
+        thats the kind of work SRE would develop so that next time if it happens,
+          it happens much more smooth, gets escalated properly, handled n fixed.
+      it is s/w development but it is process development as well
+
+      DevOps is more like build n deploy of s/w...CI/CD is development of infra
+      DevSecOps is securing, making sure not putting in infra that is insecure
+      infra is like anything that exists on AWS
+
+      we not doing any huge amt of development work on k8s continously cuz it works right now
+      it works for engineering team, without any problem
+
+      we do hv alerts, need to move worker nodes on spot instances to save some money
+      its in our scope
+
+      DBs -- DB development work n administration work, difficult ones to identify who owns the scope
+        its b/w 3 teams, schema development team, same ppl doing s/w engineering, platform backend engineering
+          guys who write python, goLang code, they r developing schemas, creating tables, SQLs for backend s/w
+        data engineering team specializes in massaging n creating data for us.
+        ultimately we r a data company
+
+        we create DB infra wid tf
+
+        we want more ppl getting more hands on wid DBs, as its a lil bit of weak spot
+
+      20-30 ppl in engineering team
+        tf interview -- deploy same infra to a/c, will hv few bugs, need to fix those to get it working
+          troubleshooting exercise on AWS n tf
+            VPC, EC2 instance, n/wing like SGs, deep dive on these n u should be good.
+
+        4-panel is tech interview but nothing crazy
