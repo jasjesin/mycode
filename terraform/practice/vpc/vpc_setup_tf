@@ -1,0 +1,81 @@
+Step 1: Setup VPC, IG, RT, EIP (optional, can be created in next step with NAT gw)
+    vpc.tf
+    ig.tf
+    rt.tf
+    eip.tf
+
+IAM Access added/needed >>
+          AmazonVPCFullAccess
+
+Step 2: Create Public ONLY 1st wid its respective RT & associate RTs
+    subnet.tf -- update NOT to refer pvt subnet
+    subnet_rt_public.tf
+    Update data.tf NOT to invoke subnet details as those are yet to be created.
+    associate_rt.tf  -- update to NOT refer to pvt subnet
+
+Step 3: Create Pvt Subnet now, wid its respective RT & associate RTs &
+        NAT gw that connects to public subnet & NACL that secure public subnet
+    subnet.tf -- update to refer pvt subnet
+    subnet_rt_pvt.tf
+    associate_rt.tf -- update to refer pvt subnet
+    Update data.tf to invoke public subnet details.
+    nat_gw.tf
+    nacl.tf
+
+Step 4: Create SG n then EC2 as EC2 refers to SG
+    sg.tf
+    ec2.tf
+
+IAM Access added/needed >>
+          AmazonEC2FullAccess
+
+Step 5: IAM user, group creation & their association. Then, policy creation & associate it to group
+    user.tf
+    group.tf
+    associate_iam.tf
+    policy.tf
+    associate_iam_policy.tf
+
+IAM Access added/needed >>
+          IAMFullAccess
+
+            terraform destroy --target=aws_instance.jas # shutdown ec2 once done wid work
+
+Step 6: Setup Tgt Group, LB & Listeners
+    tg.tf
+    sg.tf -- add SG for ELB to refer to
+    elb.tf
+    elb_listener.tf
+    associate_tg.tf
+
+
+Step 7: Setup Launch Configuration & ASG
+    sg.tf -- add SG for ASG
+    tg.tf -- add TG for ASG
+    asg_lc.tf
+    asg.tf
+
+IAM Access added/needed >>
+          AutoScalingFullAccess
+
+Step 8: Setup RDS Subnet, Pmtr Grp & RDS Instance
+    sg.tf -- add SG for RDS
+    subnet_rds.tf
+    rds_pmtrs.tf
+    rds.tf
+
+IAM Access added/needed >>
+        AmazonRDSFullAccess
+        AWSKeyManagementServicePowerUser
+        SecretsManagerReadWrite
+
+
+
+
+ec2 instance keeps getting recreated wid each reconcilation, without any change to it
+  use vpc_security_group_ids instead of security_groups to fix it.
+
+Improvisation Work to do:
+1. Dependencies on each step, need to be specified as explicit dependencies by using depends_on
+2. Modularize the code
+3. Start break-fixing the code by searching for issues on google
