@@ -2,6 +2,10 @@ variable "name" {
   description = "This is a mandatory input"
 }
 
+variable "region" {
+  default = "This is a mandatory input"
+}
+
 variable "cidr_block" {
   description = "This is a mandatory input"
 }
